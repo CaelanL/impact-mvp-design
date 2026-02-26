@@ -1,65 +1,131 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/UserContext";
+import { users } from "@/lib/data";
+import { getUserVenture, getCoachedVentures, getUserCity } from "@/lib/permissions";
+import { RoleBadge } from "@/components/RoleBadge";
+import { useEffect } from "react";
+
+const personaDescriptions: Record<string, string> = {
+  "user-maria": "Runs \"Hope Kitchen\" — a meal ministry in Chicago. New to the program, in the Accelerate stage. The simplest app experience.",
+  "user-james": "Coaches 3 venture leaders in Chicago. Doesn't run his own venture. Sees leaders, their data, and keeps notes.",
+  "user-josh": "Runs \"Milwaukee Barbers\" AND coaches 2 other venture leaders. The dual-role test case.",
+  "user-sarah": "Leads the Chicago region. Oversees all coaches and ventures in the city. Doesn't run her own venture.",
+  "user-david": "Leads Milwaukee AND runs his own tutoring venture. Another dual-role test — city oversight plus personal venture.",
+  "user-ben": "Sees everything. All cities, all ventures, all affiliates. The full organizational view.",
+};
+
+export default function PersonaSelector() {
+  const { selectUser, currentUser } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (currentUser) {
+      router.push("/dashboard");
+    }
+  }, [currentUser, router]);
+
+  const handleSelect = (userId: string) => {
+    selectUser(userId);
+    router.push("/dashboard");
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col">
+      {/* Subtle grain overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+      }} />
+
+      <div className="relative flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+        {/* Header */}
+        <div className="text-center mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2.5 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+              <span className="text-stone-900 font-bold text-base">I3</span>
+            </div>
+          </div>
+          <h1 className="font-[family-name:var(--font-instrument-serif)] text-4xl sm:text-5xl lg:text-6xl text-stone-50 mb-4 tracking-tight">
+            Impact360
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-stone-500 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
+            Select a persona to explore the app from their perspective.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 text-xs text-stone-600 bg-stone-900 border border-stone-800 rounded-full px-4 py-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Interactive Prototype
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Persona grid */}
+        <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {users.map((user) => {
+            const uniqueRoles = [...new Set(user.roles.map((r) => r.role))];
+            const venture = getUserVenture(user);
+            const coached = getCoachedVentures(user);
+            const city = getUserCity(user);
+
+            return (
+              <button
+                key={user.id}
+                onClick={() => handleSelect(user.id)}
+                className="group relative bg-stone-900/60 border border-stone-800 rounded-2xl p-5 sm:p-6 text-left cursor-pointer hover:border-stone-700 hover:bg-stone-900/80 hover:shadow-lg hover:shadow-stone-950/50"
+              >
+                {/* Subtle top accent */}
+                <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-stone-700 to-transparent group-hover:via-amber-500/40" />
+
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-11 h-11 rounded-full bg-stone-800 border border-stone-700 flex items-center justify-center text-stone-400 text-sm font-semibold shrink-0 group-hover:border-stone-600 group-hover:text-stone-300">
+                    {user.name.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-base font-semibold text-stone-200 group-hover:text-stone-50 mb-1.5">
+                      {user.name}
+                    </h3>
+                    <div className="flex flex-wrap gap-1">
+                      {uniqueRoles.map((role) => (
+                        <RoleBadge key={role} role={role} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-stone-500 leading-relaxed mb-4 group-hover:text-stone-400">
+                  {personaDescriptions[user.id]}
+                </p>
+
+                {/* Quick context */}
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-600">
+                  {venture && (
+                    <span>Venture: <span className="text-stone-400">{venture.name}</span></span>
+                  )}
+                  {coached.length > 0 && (
+                    <span>Coaching: <span className="text-stone-400">{coached.length} leaders</span></span>
+                  )}
+                  {city && (
+                    <span>City: <span className="text-stone-400">{city.name}</span></span>
+                  )}
+                </div>
+
+                {/* Arrow hint */}
+                <div className="absolute bottom-5 right-5 w-8 h-8 rounded-full bg-stone-800/0 group-hover:bg-stone-800 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-stone-600 group-hover:text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                  </svg>
+                </div>
+              </button>
+            );
+          })}
         </div>
-      </main>
+
+        {/* Footer note */}
+        <p className="mt-12 text-xs text-stone-700 text-center max-w-lg">
+          This prototype demonstrates the additive permissions model — each role adds
+          surface area to the same app. Try switching between personas to see how the
+          navigation and dashboard adapt.
+        </p>
+      </div>
     </div>
   );
 }
