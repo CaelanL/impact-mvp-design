@@ -2,7 +2,7 @@
 
 import { AppLayout } from "@/components/AppLayout";
 import { useUser } from "@/lib/UserContext";
-import { cities, ventures, allUsers, coachAssignments } from "@/lib/data";
+import { cities, ventures, allUsers, coachAssignments, orgs } from "@/lib/data";
 import { ImpactCircle } from "@/components/ImpactCircle";
 import { StatusBadge } from "@/components/StatusBadge";
 import { StageBadge } from "@/components/StageBadge";
@@ -10,17 +10,31 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function AllCitiesPage() {
-  const { currentUser } = useUser();
+  const { currentUser, activeContext } = useUser();
   const [expandedCity, setExpandedCity] = useState<string | null>(null);
 
   if (!currentUser) return null;
+
+  // Filter ventures by active context
+  const scopedVentures = activeContext?.type === "affiliate"
+    ? ventures.filter((v) => v.affiliateId === activeContext.affiliateId)
+    : ventures;
+
+  const activeOrgName = activeContext?.type === "affiliate"
+    ? orgs.find((o) => o.id === activeContext.affiliateId)?.name ?? ""
+    : "";
+  const contextLabel = activeContext?.type === "platform"
+    ? "across all affiliates"
+    : activeContext?.type === "affiliate"
+      ? `in ${activeOrgName}`
+      : "across the LINC network";
 
   return (
     <AppLayout>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">All Cities</h1>
         <p className="text-sm text-stone-500 mt-1">
-          {cities.length} cities across the LINC network
+          {cities.length} cities {contextLabel}
         </p>
       </div>
 
@@ -28,16 +42,16 @@ export default function AllCitiesPage() {
       <div className="bg-white rounded-xl border border-stone-200 p-6 mb-5">
         <h2 className="text-sm font-semibold text-stone-900 mb-5">Network-Wide Impact</h2>
         <div className="flex justify-center gap-6 sm:gap-10">
-          <ImpactCircle label="Social" value={ventures.reduce((s, v) => s + v.impact.social, 0)} type="social" />
-          <ImpactCircle label="Spiritual" value={ventures.reduce((s, v) => s + v.impact.spiritual, 0)} type="spiritual" />
-          <ImpactCircle label="Economic" value={ventures.reduce((s, v) => s + v.impact.economic, 0)} type="economic" />
+          <ImpactCircle label="Social" value={scopedVentures.reduce((s, v) => s + v.impact.social, 0)} type="social" />
+          <ImpactCircle label="Spiritual" value={scopedVentures.reduce((s, v) => s + v.impact.spiritual, 0)} type="spiritual" />
+          <ImpactCircle label="Economic" value={scopedVentures.reduce((s, v) => s + v.impact.economic, 0)} type="economic" />
         </div>
       </div>
 
       {/* City cards */}
       <div className="space-y-3">
         {cities.map((city) => {
-          const cityVentures = ventures.filter((v) => v.cityId === city.id);
+          const cityVentures = scopedVentures.filter((v) => v.cityId === city.id);
           const leader = allUsers.find((u) => u.id === city.leaderId);
           const isExpanded = expandedCity === city.id;
           const coachIds = [...new Set(

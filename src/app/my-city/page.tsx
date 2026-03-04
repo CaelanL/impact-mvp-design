@@ -10,11 +10,11 @@ import { StageBadge } from "@/components/StageBadge";
 import Link from "next/link";
 
 export default function MyCityPage() {
-  const { currentUser } = useUser();
+  const { currentUser, activeContext } = useUser();
   if (!currentUser) return null;
 
   const city = getUserCity(currentUser);
-  const cityVentures = getCityVentures(currentUser);
+  const cityVentures = getCityVentures(currentUser, activeContext ?? undefined);
 
   if (!city) {
     return (

@@ -32,7 +32,7 @@ export default function VentureDetailPage({ params }: { params: Promise<{ id: st
 
   const leader = allUsers.find((u) => u.id === venture.leaderId);
   const city = cities.find((c) => c.id === venture.cityId);
-  const canSeeNotes = hasAnyRole(currentUser, ["coach", "city_leader", "ceo", "platform_owner"]);
+  const canSeeNotes = hasAnyRole(currentUser, ["coach", "city_leader", "director", "platform_owner", "admin"]);
   const isOwnVenture = currentUser.roles.some(
     (r) => r.role === "venture_leader" && r.scopeId === venture.id
   );

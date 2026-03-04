@@ -12,7 +12,8 @@ const roleColors: Record<Role, string> = {
   venture_leader: "bg-teal-500/10 text-teal-700 border-teal-500/25",
   coach: "bg-amber-500/10 text-amber-700 border-amber-500/25",
   city_leader: "bg-violet-500/10 text-violet-700 border-violet-500/25",
-  ceo: "bg-rose-500/10 text-rose-700 border-rose-500/25",
+  director: "bg-rose-500/10 text-rose-700 border-rose-500/25",
+  admin: "bg-indigo-500/10 text-indigo-700 border-indigo-500/25",
   platform_owner: "bg-stone-800 text-stone-100 border-stone-700",
 };
 

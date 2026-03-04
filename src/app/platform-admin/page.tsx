@@ -43,7 +43,7 @@ export default function PlatformAdminPage() {
                     <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-stone-500 mt-0.5">
                       <span>{orgCities.length} cities</span>
                       <span>{orgVentures.length} ventures</span>
-                      <span>{allUsers.length} users</span>
+                      <span>{allUsers.filter((u) => u.roles.some((r) => r.affiliateId === org.id)).length} users</span>
                     </div>
                   </div>
                   <button className="px-3 py-1.5 border border-stone-200 text-stone-600 rounded-lg text-xs font-medium hover:bg-stone-50 cursor-pointer">
@@ -78,13 +78,13 @@ export default function PlatformAdminPage() {
           </div>
         </div>
 
-        {/* Future affiliates note */}
+        {/* Affiliate model note */}
         <div className="bg-stone-50 rounded-xl border border-stone-200 p-6 text-center">
           <p className="text-sm text-stone-500 font-medium">
-            When additional organizations join Impact360, they will appear in the affiliate list above.
+            Each affiliate gets their own Director, hierarchy, and ventures — fully isolated from other organizations.
           </p>
           <p className="text-xs text-stone-400 mt-1">
-            Each affiliate gets their own CEO, hierarchy, and ventures — fully isolated from other organizations.
+            City Leaders can see affiliates in their city. The Platform Owner sees everything.
           </p>
         </div>
       </div>

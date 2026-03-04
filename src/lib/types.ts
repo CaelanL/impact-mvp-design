@@ -2,12 +2,19 @@
 // Core types for Impact360
 // ============================================================
 
-export type Role =
-  | "venture_leader"
-  | "coach"
-  | "city_leader"
-  | "ceo"
-  | "platform_owner";
+// --- Role types (two-layer model) ---
+
+export type AffiliateRole = "director" | "coach" | "venture_leader";
+export type PlatformRole = "platform_owner" | "admin" | "city_leader";
+export type Role = AffiliateRole | PlatformRole;
+
+// --- Context switcher ---
+
+export type ActiveContext =
+  | { type: "affiliate"; affiliateId: string }
+  | { type: "platform" };
+
+// --- Core enums ---
 
 export type VentureStage =
   | "accelerate"
@@ -19,6 +26,8 @@ export type PrivacyLevel = "private" | "discoverable" | "connectable";
 
 export type CheckInStatus = "submitted" | "overdue" | "way_overdue" | "not_started";
 
+// --- Data interfaces ---
+
 export interface User {
   id: string;
   name: string;
@@ -29,6 +38,7 @@ export interface User {
 
 export interface UserRole {
   role: Role;
+  affiliateId?: string; // Present for affiliate roles, absent for platform roles
   scopeType: "venture" | "city" | "org" | "platform";
   scopeId: string;
 }
@@ -39,6 +49,7 @@ export interface Venture {
   cause: string;
   address: string;
   cityId: string;
+  affiliateId: string;
   leaderId: string;
   stage: VentureStage;
   privacy: PrivacyLevel;
@@ -64,6 +75,8 @@ export interface Org {
   name: string;
   slug: string;
 }
+
+export type Affiliate = Org;
 
 export interface CoachAssignment {
   coachId: string;

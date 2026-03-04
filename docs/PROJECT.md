@@ -25,40 +25,45 @@ The app helps LINC's hierarchy — from venture leaders on the ground to the CEO
 
 ## 2. User Roles & Hierarchy
 
+> Full details in `ROLES-DEEP-DIVE.md`. Summary below.
+
+There are two separate role systems:
+
+### Affiliate Roles (the product template)
+
+Every organization using Impact360 gets exactly 3 roles. Affiliates are fully isolated — they never see other affiliates or the platform layer.
+
 ```
-┌─────────────────────────────────────────────────┐
-│  Platform Owner (Ben / LINC)                    │
-│  Can see ALL affiliates using the platform      │
-├─────────────────────────────────────────────────┤
-│  CEO / Director                                 │
-│  Top-level view of one affiliate/org            │
-│  (For LINC, this is also Ben right now)         │
-├─────────────────────────────────────────────────┤
-│  City Leader                                    │
-│  Oversees one city — sees all coaches &         │
-│  ventures in that city (~6 cities, ~1 per city) │
-├─────────────────────────────────────────────────┤
-│  Coach                                          │
-│  Manages multiple venture leaders               │
-│  Keeps notes, tracks check-ins, has own docs    │
-├─────────────────────────────────────────────────┤
-│  Venture Leader                                 │
-│  Runs a ministry venture on the ground          │
-│  Inputs data, submits reports, writes stories   │
-└─────────────────────────────────────────────────┘
+Director (can have multiple per affiliate)
+  └── Coach
+        └── Venture Leader
 ```
 
-### Role details
+| Role | What they do | What they see |
+|------|-------------|---------------|
+| **Director** | Runs the org. Manages coaches, views all ventures, generates org-wide reports, invites users. | Everything inside their affiliate. |
+| **Coach** | Manages assigned venture leaders. Writes private notes, tracks check-ins, helps with training. | Their assigned VLs and those ventures' data. |
+| **Venture Leader** | Runs a venture. Submits impact data, updates venture profile, writes stories. | Their own venture only. |
 
-| Role | Count (approx) | Primary actions |
-|------|----------------|-----------------|
-| **Platform Owner** | 1 (Ben) | See all affiliates, manage platform-level config |
-| **CEO / Director** | 1 per affiliate | Org-wide dashboard, all cities visible, compile cross-venture reports |
-| **City Leader** | ~6 (1 per city) | City dashboard, see coaches + ventures in their city |
-| **Coach** | Multiple per city | Manage venture leaders, write attributed notes, track check-ins, manage training docs |
-| **Venture Leader** | Many | Submit reports, update venture profile, input impact data, write signature stories |
+### Platform Roles (LINC-specific)
 
-> **Open question:** Is "Director" (from the wireframes) the same as "City Leader"? Or is it a separate role? The wireframe shows "Director Notes" on the venture profile page — need to confirm who "Director" maps to in the hierarchy.
+These exist because LINC operates the Impact360 platform. They sit above/across affiliates and are NOT part of the affiliate template.
+
+```
+Platform Owner (Ben)
+  ├── Admin (developers, onboarding staff)
+  └── City Leader (LINC staff, one per city)
+```
+
+| Role | What they do | What they see |
+|------|-------------|---------------|
+| **Platform Owner** | Runs the entire platform. Manages platform config, onboards affiliates. | Everything. All affiliates, all data. |
+| **Admin** | Platform-level worker — developers, onboarding staff, ops. | Configurable per need. |
+| **City Leader** | LINC employee who runs a city. Oversees LINC ventures in their city, may recruit/onboard affiliates. | LINC ventures in their city + recruited affiliates. |
+
+### LINC as an affiliate
+
+LINC is both the platform operator AND an affiliate. Ben is both Platform Owner (platform layer) and Director of LINC (affiliate layer). LINC coaches and VLs are normal affiliate users with no platform awareness. City Leaders may also hold affiliate roles inside LINC — their city-level view blends LINC ventures with recruited affiliates. See `ROLES-DEEP-DIVE.md` for details and open questions on that overlap.
 
 ---
 
@@ -77,18 +82,18 @@ The app helps LINC's hierarchy — from venture leaders on the ground to the CEO
 - Stacked sections, top to bottom, based on roles held:
   - "My Venture" section (if you're a VL) — your impact summary, deadlines
   - "My Leaders" section (if you're a Coach) — who's submitted, who hasn't, flags
-  - "My City" section (if you're a City Leader) — city-level rollup, coach activity
-  - "All Cities" section (if you're CEO) — org-wide health
+  - "My City" section (if you're a City Leader, platform role) — city-level rollup, coach activity
+  - "All Ventures" section (if you're a Director) — org-wide health within your affiliate
 - You only see the sections relevant to your roles
-- A VL-only user sees a clean, simple dashboard. A City Leader + VL sees two sections. No clutter for people who don't need it.
+- A VL-only user sees a clean, simple dashboard. A Coach + VL sees two sections. No clutter for people who don't need it.
 
 > **Open question:** Should these dashboard sections be collapsible cards? Tabs? Just stacked vertically? Need to prototype and see what feels right. Probably stacked cards for now — tabs would hide information that multi-role users might want at a glance.
 
 **Ventures**
 - VL sees: their single venture (goes directly to venture profile)
 - Coach sees: a list of their assigned ventures (click into any one)
-- City Leader sees: all ventures in their city
-- CEO sees: all ventures across all cities
+- Director sees: all ventures in their affiliate
+- City Leader (platform): all LINC ventures in their city
 - Same page, same component — just a different query scope
 - Clicking into any venture shows the same venture profile page from the wireframes
 
@@ -97,7 +102,7 @@ The app helps LINC's hierarchy — from venture leaders on the ground to the CEO
 **Add Impact**
 - VL: submits for their own venture (no selector needed — it's just "my venture")
 - Coach+VL: defaults to their own venture, but can also submit on behalf of a coached venture (via a venture selector dropdown that only appears if you have >1 venture in scope)
-- City Leader / CEO: can submit on behalf of any venture in their scope
+- Director: can submit on behalf of any venture in their affiliate
 - Alternative: instead of a dropdown on the Add Impact page, the "submit on behalf of" action could live on the venture profile page itself — you're looking at a venture, you see they haven't submitted, you click "add impact for this venture" right there. More contextual.
 
 > **Open question:** Which approach is better — dropdown on Add Impact page, or contextual action on venture profile? Leaning toward: keep Add Impact simple (just your own venture), and put the "on behalf of" action on the venture profile page. Cleaner separation.
@@ -105,8 +110,8 @@ The app helps LINC's hierarchy — from venture leaders on the ground to the CEO
 **Reports**
 - VL: can generate reports for their own venture only
 - Coach: can generate for any assigned venture, or a rolled-up report across all their ventures
-- City Leader: can generate city-level reports
-- CEO: can generate org-wide reports, filter by city/region/venture/cause
+- Director: can generate org-wide reports for their affiliate, filter by venture/cause
+- City Leader (platform): can generate city-level reports across LINC ventures
 - Same page — the filter options just expand with your role scope
 
 **Training**
@@ -128,41 +133,49 @@ The app helps LINC's hierarchy — from venture leaders on the ground to the CEO
 - Scales by role:
   - VL: Account, Venture settings, Notifications, Network Visibility
   - Coach: + impact metric configuration for their ventures?
-  - City Leader: + city-level admin
-  - CEO: + org-wide admin, user management, invites
-  - Platform Owner: + affiliate management
+  - Director: + org-wide admin, user management, invites (within their affiliate)
+  - City Leader (platform): + city-level admin
+  - Platform Owner: + affiliate management, platform config
 
 #### Role-gated nav items (only appear if you have the role):
 
-| Nav item | Who sees it | What it is |
-|----------|------------|------------|
-| **My City** | City Leader+ | City-level view: all coaches, all ventures, rollup stats, assignments |
-| **All Cities** | CEO+ | Org-level view: all cities at a glance, drill into any city |
-| **Platform Admin** | Platform Owner only | All affiliates, platform-level config |
+| Nav item | Who sees it | Layer | What it is |
+|----------|------------|-------|------------|
+| **My City** | City Leader | Platform | City-level view: LINC ventures + recruited affiliates in their city |
+| **All Cities** | Platform Owner | Platform | All cities at a glance, drill into any |
+| **Platform Admin** | Platform Owner, Admin | Platform | All affiliates, platform-level config |
 
 > **Open question:** Do "My City" and "All Cities" deserve their own nav items, or are they just sections within the Dashboard? Leaning toward separate nav items — they're rich enough to be their own pages. The dashboard shows a summary; the dedicated page shows the full detail.
 
 #### Full nav by role:
 
 ```
-Venture Leader:
-  Dashboard | Ventures | Add Impact | Reports | Training | Network | Settings
+Affiliate roles (any org including LINC):
 
-Coach (also a VL):
-  Dashboard | Ventures | Add Impact | Reports | Training | Network | Settings
-  (same nav — but Dashboard has "My Leaders" section, Ventures shows a list, Reports has wider scope)
+  Venture Leader:
+    Dashboard | Ventures | Add Impact | Reports | Training | Network | Settings
 
-City Leader (also a VL):
-  Dashboard | Ventures | Add Impact | My City | Reports | Training | Network | Settings
+  Coach (also a VL):
+    Dashboard | Ventures | Add Impact | Reports | Training | Network | Settings
+    (same nav — but Dashboard has "My Leaders" section, Ventures shows a list, Reports has wider scope)
 
-CEO:
-  Dashboard | Ventures | All Cities | Reports | Network | Settings
+  Director:
+    Dashboard | Ventures | Reports | Network | Settings
+    (sees all ventures/data in their affiliate; Add Impact/Training appear if also a VL)
 
-Platform Owner:
-  Dashboard | Ventures | All Cities | Platform Admin | Reports | Network | Settings
+Platform roles (LINC only):
+
+  City Leader:
+    Dashboard | Ventures | My City | Reports | Network | Settings
+    (+ any affiliate roles they hold within LINC)
+
+  Admin:
+    Dashboard | Platform Admin | Settings
+
+  Platform Owner (Ben):
+    Dashboard | Ventures | All Cities | Platform Admin | Reports | Network | Settings
+    (+ Director nav from LINC affiliate role)
 ```
-
-> **Open question:** Does the CEO even need "Add Impact" or "Training" in their nav? Probably not — those are operational, not oversight. The CEO's job is dashboards, reports, and managing the org. But if a CEO is also a VL (unlikely but possible), those would appear. The additive model handles this naturally.
 
 ### Why this works
 - No context switching. Josh in Milwaukee logs in and sees everything he has access to.
@@ -171,10 +184,15 @@ Platform Owner:
 - The DB model is clean: a user has roles, each role is scoped to a context (venture, city, org). Permissions are checked per-resource.
 
 ### DB implication
-- `users` table: one row per person
-- `user_roles` join table: user_id, role (venture_leader | coach | city_leader | ceo | platform_owner), scope_type (venture | city | org | platform), scope_id
-- A user can have multiple rows in `user_roles`
-- Every data query checks: "does the requesting user have a role that grants access to this resource's scope?"
+
+Two separate role tables reflecting the two layers:
+
+- `affiliate_roles`: user_id, affiliate_id, role (director | coach | venture_leader)
+- `platform_roles`: user_id, role (platform_owner | admin | city_leader), scope_id (city_id for city_leaders, null for others)
+- `city_leader_affiliates`: links city leaders to recruited affiliates they can see
+- A user can have entries in both tables. The app checks both to determine what to show.
+
+> See `ROLES-DEEP-DIVE.md` for the full schema.
 
 > **Open question:** If a coach gets reassigned, do their old notes transfer to the new coach? Or does the new coach just see them because notes are tied to the venture, not the coach relationship? Probably tie notes to the venture (with author attribution) so they persist regardless of coach changes.
 
@@ -334,9 +352,9 @@ Ventures have a status: **Accelerate → Build → Scale → Multiply**
 ### Architecture & Roles
 | # | Question | Status |
 |---|----------|--------|
-| 1 | Is "Director" = "City Leader"? | **Needs confirmation** |
-| 2 | Can roles be skipped? (e.g., small affiliate with no city leaders) | **Needs answer** |
-| 3 | Who assigns coach ↔ VL relationships? City Leader? CEO? Self-serve? | **Needs answer** |
+| 1 | Is "Director" = "City Leader"? | **Resolved.** No — Director is an affiliate role (top of an org). City Leader is a platform role (LINC staff, one per city). See `ROLES-DEEP-DIVE.md`. |
+| 2 | Can roles be skipped? (e.g., small affiliate with no coaches) | **Partially answered.** City Leader doesn't apply to affiliates (it's platform-only). An affiliate can have just Directors + VLs with no Coaches — the hierarchy flexes. |
+| 3 | Who assigns coach ↔ VL relationships? Director? Self-serve? | **Needs answer** |
 | 4 | When a coach is reassigned, do notes transfer? | **Leaning: notes tied to venture, not coach relationship** |
 
 ### Data & Impact
@@ -417,22 +435,22 @@ Ventures have a status: **Accelerate → Build → Scale → Multiply**
 
 ## 8. Edge Cases
 
-- **Venture with no coach assigned** — what do they see? Who do they report to? Does their data just go to the city leader?
+- **Venture with no coach assigned** — what do they see? Who do they report to? Does their data just go to the Director?
 - **Coach leaves** — notes persist (tied to venture, attributed to author). New coach inherits full history.
 - **VL stops reporting** — at what point do reminders trigger? Who gets notified? What if they ghost completely?
-- **City with no city leader** — does CEO absorb that city, or does it just have no oversight?
+- **City with no city leader** — platform-layer concern. Does Platform Owner absorb that city, or does it just have no LINC oversight?
 - **Venture spans two cities** — possible? Or does a venture strictly belong to one city?
 - **Report corrections** — can a VL edit submitted data? Is there a window? Does an edit notify the coach?
 - **Director inputs data for a VL** — does the VL see that someone else submitted on their behalf? Can they dispute or overwrite?
-- **Private ventures** — hidden from map and network, but coaches and CEO can still see them. Can other VLs see that a private venture exists?
-- **Small affiliate** — only 2 ventures, no need for city leaders. Can the hierarchy flex?
+- **Private ventures** — hidden from map and network, but coaches and Directors can still see them. Can other VLs see that a private venture exists?
+- **Small affiliate** — only 2 ventures, no need for coaches. Can the hierarchy flex? (Yes — City Leader doesn't apply, it's platform-only. An affiliate can skip the Coach layer.)
 - **Seasonal ventures** — summer camps, holiday ministries. Active 3 months, dormant 9. How does check-in tracking handle this?
 - **Venture closure / graduation** — what's the lifecycle? Active → Inactive → Archived? What triggers transitions? Who decides?
 - **Signature Story mentions a person** — any consent needed? Privacy implications?
 - **Notification fatigue** — too many "you haven't submitted" emails → people unsubscribe → defeats the purpose
 - **Two coaches for one VL** — possible? Or strictly 1:1? If 1:1, what about during transitions?
 - **Same metric name, different meaning** — one venture's "people fed" is weekly, another's is monthly. Aggregation becomes misleading.
-- **A VL who is also a CEO** — extreme case, but the additive model handles it. They just see everything. Dashboard has many sections.
+- **A VL who is also a Director** — extreme case, but the additive model handles it. They just see everything. Dashboard has many sections.
 
 ---
 
@@ -458,4 +476,4 @@ Goal: Have testers at every level of the hierarchy.
 
 ---
 
-*Last updated: 2026-02-25 — v2*
+*Last updated: 2026-03-03 — v3 (roles updated to match ROLES-DEEP-DIVE.md)*

@@ -20,16 +20,38 @@ Instead of real auth, the app opens to a **persona selector page**. A list of ha
 
 ### Proposed Personas
 
-| # | Name | Roles | Description |
-|---|------|-------|-------------|
-| 1 | **Maria** | Venture Leader | Runs "Hope Kitchen" — a meal ministry in Chicago. She's new, in the Accelerate stage. Simple, clean experience. |
-| 2 | **James** | Coach | Coaches 3 venture leaders in Chicago. Doesn't run his own venture. Sees his leaders, their data, his notes. |
-| 3 | **Josh** | Venture Leader + Coach | Runs "Milwaukee Barbers" AND coaches 2 other venture leaders. The dual-role test case. |
-| 4 | **Sarah** | City Leader | Leads the Chicago city. Oversees all coaches and ventures there. Doesn't run her own venture. |
-| 5 | **David** | City Leader + Venture Leader | Leads Milwaukee city AND runs his own tutoring venture. Another dual-role test. |
-| 6 | **Ben** | CEO + Platform Owner | Sees everything. The "god view." All cities, all ventures, all affiliates. |
+| # | Name | Roles | Affiliate | Switcher? | Description |
+|---|------|-------|-----------|-----------|-------------|
+| 1 | **Maria** | Venture Leader | LINC | No | Runs "Hope Kitchen" in Chicago. Simplest experience. Single-org, single-role. |
+| 2 | **James** | Coach | LINC | No | Coaches 3 VLs in Chicago. No venture of his own. Single-org. |
+| 3 | **Josh** | Venture Leader + Coach | LINC | No | Runs "Milwaukee Barbers" AND coaches 2 others. Dual affiliate-role test. |
+| 4 | **Sarah** | City Leader (platform) | — | Yes (LINC / Grace Church) | Oversees Chicago. Sees LINC ventures AND Grace Church via the org switcher. |
+| 5 | **David** | City Leader (platform) + VL (LINC) | LINC | Yes (LINC) | Leads Milwaukee AND runs his own venture. Dual-layer test (platform + affiliate). |
+| 6 | **Ben** | Director (LINC) + Platform Owner | LINC | Yes (LINC / Grace Church / Platform) | The god-view. Can switch between affiliate views and a platform-wide view. |
+| 7 | **Pastor Mike** | Director | Grace Church | No | Runs Grace Church Chicago. Affiliate-only — no awareness of LINC or the platform. |
 
-> These personas should be enough to test every role and the key dual-role combos. We can add more if needed.
+> These personas test: single-role affiliate users (Maria, James), dual affiliate roles (Josh), platform roles (Sarah, David), the platform/affiliate overlap (Ben), and a fully isolated affiliate director (Mike).
+
+### Org/Affiliate Context Switcher
+
+The prototype includes a **Slack/Vercel-style context switcher** in the sidebar. This is how platform-level users navigate between affiliates.
+
+**How it works:**
+- Appears between the logo and nav items in the sidebar
+- Only visible to users with access to multiple affiliates or platform roles
+- Affiliate-only users (Maria, James, Josh, Mike) never see it — their world is their org
+- Switching context re-scopes shared pages (Ventures, Dashboard, Reports) to the selected affiliate
+- Platform pages (My City, All Cities, Platform Admin) always show cross-org data
+
+**Who sees what in the switcher:**
+- **Sarah** (City Leader): LINC, Grace Church (affiliates in her city)
+- **David** (City Leader): LINC (only affiliate in Milwaukee)
+- **Ben** (Director + Platform Owner): LINC, Grace Church, Platform View
+
+**Test data:**
+- 2 affiliates: **LINC** (7 ventures across Chicago + Milwaukee) and **Grace Church Chicago** (2 ventures)
+- Grace Church has a Director (Mike), 2 Venture Leaders (Rachel, Kevin), and 2 ventures
+- Sarah's city (Chicago) contains ventures from both affiliates — this is the cross-org test case
 
 ---
 
@@ -48,14 +70,14 @@ Every page below exists as a real route. Content is placeholder/hard-coded. Butt
   - **"My Venture" card** — shows if the user IS a venture leader. Venture name, status badge (Accelerate/Build/Scale/Multiply), 3 impact circles (Social/Spiritual/Economic) with placeholder numbers, last submitted date.
   - **"My Leaders" card** — shows if the user is a Coach. List of assigned VLs with name, venture name, last submitted date, status indicator (green = submitted this month, yellow = overdue, red = way overdue). Placeholder data.
   - **"My City" card** — shows if the user is a City Leader. City name, # of coaches, # of ventures, city-level impact circles (aggregated placeholder numbers), list of coaches with quick stats.
-  - **"All Cities" card** — shows if the user is CEO. Grid of city cards, each showing city name, # ventures, health indicator.
-  - **"Platform" card** — shows if the user is Platform Owner. List of affiliates (just "LINC" for now) with stats.
+  - **"All Cities" card** — shows if the user is a Director or Platform Owner. Grid of city cards, each showing city name, # ventures, health indicator. Scoped to the active affiliate context.
+  - **"Platform" card** — shows if the user is Platform Owner. Lists all affiliates (LINC + Grace Church) with per-org stats.
 - **Map placeholder** — a box that says "Map View — Coming Soon" or a static image
 - **Quick action buttons:** Add Impact, Generate Report (non-functional, just present)
 
 ### 3. Ventures (`/ventures`)
 - **If user has 1 venture (VL only):** redirects straight to that venture's profile
-- **If user has multiple ventures in scope (Coach, City Leader, CEO):** shows a list/grid of venture cards
+- **If user has multiple ventures in scope (Coach, City Leader, Director):** shows a list/grid of venture cards, scoped to the active affiliate context
   - Each card: venture name, leader name, city, status badge, last submission date
   - Click → goes to that venture's profile page
 - **If user is also a VL:** their own venture is pinned to the top with a "My Venture" label, visually distinguished from the ones they oversee
@@ -91,20 +113,22 @@ Every page below exists as a real route. Content is placeholder/hard-coded. Butt
     - Economic: $ Into Upside, New Jobs
   - Stewardship section: $ Raised / $ Spent
   - Save button → shows a mock review popup → "Congrats!" message
-- **This page does NOT appear for coaches/city leaders/CEO in the nav.** If they need to add data on behalf of a VL, that action would be on the venture profile page (a button that says "Add Impact for This Venture" — present but non-functional in MVP 0).
+- **This page does NOT appear for coaches/city leaders/directors in the nav.** If they need to add data on behalf of a VL, that action would be on the venture profile page (a button that says "Add Impact for This Venture" — present but non-functional in MVP 0).
 
 ### 6. My City (`/my-city`)
-- Only appears in nav for City Leaders
+- Only appears in nav for City Leaders (platform role)
 - City name header
 - **Coaches section:** list of coaches in this city with # of assigned ventures, activity indicator
-- **Ventures section:** all ventures in this city, sortable/filterable (placeholder)
-- **City impact rollup:** 3 circles aggregated across all ventures
+- **Ventures section:** ventures in this city, filtered by the active affiliate context
+- **City impact rollup:** 3 circles aggregated across visible ventures
 - Click any coach → see their profile. Click any venture → venture profile page.
+- When Sarah switches context (LINC → Grace Church), this page shows only that affiliate's Chicago ventures
 
 ### 7. All Cities (`/all-cities`)
-- Only appears in nav for CEO+
+- Only appears in nav for Director+ and Platform Owner/Admin
 - Grid of city cards (one per city)
 - Each card: city name, city leader name, # coaches, # ventures, health indicator
+- Venture counts and impact stats scoped to the active affiliate context
 - Click a city → goes to that city's view (same as My City page but for the selected city)
 
 ### 8. Reports (`/reports`)
@@ -112,7 +136,7 @@ Every page below exists as a real route. Content is placeholder/hard-coded. Butt
   - Filter controls: by venture / city / region (dropdowns, functional enough to show different scopes)
   - Date range selector
   - "Generate Report" button → mock popup → placeholder PDF-like view
-- **Filter scope adapts to role:** VL only sees their venture. Coach sees their ventures. City leader sees their city. CEO sees everything.
+- **Filter scope adapts to role + context:** VL only sees their venture. Coach sees their ventures. Director sees their affiliate. Platform Owner in platform context sees everything.
 
 ### 9. Training (`/training`)
 - Only appears in nav for Venture Leaders and Coaches
@@ -136,14 +160,14 @@ Every page below exists as a real route. Content is placeholder/hard-coded. Butt
 - VL: Account, Venture, Notifications, Network Visibility
 - Coach: + Impact Metrics
 - City Leader: + City Admin
-- CEO: + Org Admin, User Management
-- Platform Owner: + Platform Admin
+- Director: + Org Admin, User Management
+- Platform Owner/Admin: + Platform Admin
 
 ### 12. Platform Admin (`/platform-admin`)
-- Only appears for Platform Owner
-- List of affiliates (just "LINC" for now)
-- Placeholder stats per affiliate
-- "This is where you'd manage all organizations using Impact360"
+- Only appears for Platform Owner and Admin
+- List of affiliates (LINC + Grace Church) with per-org venture/user counts
+- Platform-wide stats (total affiliates, cities, ventures, users)
+- Not scoped by context — always shows the full platform view
 
 ---
 
@@ -162,14 +186,19 @@ ALWAYS VISIBLE:
 CONDITIONAL:
   Add Impact        → only if user is a Venture Leader
   Training          → only if user is a VL or Coach
-  My City           → only if user is a City Leader
-  All Cities        → only if user is CEO+
-  Platform Admin    → only if user is Platform Owner
+  My City           → only if user is a City Leader (platform role)
+  All Cities        → only if user is a Director, Platform Owner, or Admin
+  Platform Admin    → only if user is Platform Owner or Admin
 ```
+
+**Sidebar also includes:**
+- **Context switcher** (between logo and nav) — only for users with multi-org access. Shows current affiliate name, dropdown to switch. See "Org/Affiliate Context Switcher" section above.
+- **User section** at bottom with name, email, "Switch Persona" button
 
 **Top bar:**
 - Current user's name + role badges
-- "Switch Persona" button → returns to persona selector (for demo purposes)
+- "Viewing: [affiliate name]" indicator (only for users with the switcher)
+- "Prototype Mode" badge
 
 ---
 
@@ -185,13 +214,12 @@ CONDITIONAL:
 
 ## Tech Approach
 
+- **Next.js 16 (App Router), TypeScript, Tailwind 4** — deployed on Vercel
 - **Frontend only** — no backend, no database, no API
-- All data hard-coded in JSON files or constants
-- Routing for all pages
-- Role-checking logic that reads from the selected persona's role array
-- Component-based — even though it's a prototype, build it in a way that the components carry forward into production
-
-> **Open question for Caelan:** Tech stack preference? The team uses Vercel for deploys, so Next.js is the natural fit. But open to React + Vite, or whatever the 4-person team is comfortable with. This decision affects everything downstream since this prototype becomes production code.
+- All data hard-coded in TypeScript constants (`src/lib/data.ts`)
+- Two-layer role system: `affiliate_roles` (director, coach, venture_leader) and `platform_roles` (platform_owner, admin, city_leader) — see `ROLES-DEEP-DIVE.md`
+- `ActiveContext` state in React context controls which affiliate's data is shown on shared pages
+- Component-based — this prototype WILL become production code
 
 ---
 
@@ -217,7 +245,10 @@ After seeing this prototype, the team should be able to answer:
 3. Does the dashboard stacked-sections approach work, or is it too much for heavy multi-role users?
 4. Do the venture profile and impact input pages feel right at a structural level?
 5. Does the overall layout/visual direction feel appropriate for the user base?
+6. Does the org switcher feel natural for platform users? Is switching context the right mental model?
+7. Does the affiliate isolation feel right? Can Pastor Mike tell he's in a separate world from LINC?
+8. When Sarah switches between LINC and Grace Church, does the city view make sense?
 
 ---
 
-*Created: 2026-02-25*
+*Created: 2026-02-25 · Updated: 2026-03-03 (two-layer roles, org switcher, Grace Church test data)*

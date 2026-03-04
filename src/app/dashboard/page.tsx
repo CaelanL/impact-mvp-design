@@ -25,18 +25,19 @@ function SectionCard({ title, children, accent }: { title: string; children: Rea
 }
 
 export default function DashboardPage() {
-  const { currentUser } = useUser();
+  const { currentUser, activeContext } = useUser();
   if (!currentUser) return null;
 
   const isVL = hasRole(currentUser, "venture_leader");
   const isCoach = hasRole(currentUser, "coach");
   const isCityLeader = hasRole(currentUser, "city_leader");
-  const isCEO = hasAnyRole(currentUser, ["ceo", "platform_owner"]);
+  const isDirector = hasRole(currentUser, "director");
+  const isCEO = isDirector || hasAnyRole(currentUser, ["platform_owner", "admin"]);
   const isPlatformOwner = hasRole(currentUser, "platform_owner");
 
   const myVenture = getUserVenture(currentUser);
   const coached = getCoachedVentures(currentUser);
-  const cityVentures = getCityVentures(currentUser);
+  const cityVentures = getCityVentures(currentUser, activeContext ?? undefined);
   const myCity = getUserCity(currentUser);
 
   return (
@@ -169,12 +170,15 @@ export default function DashboardPage() {
           </SectionCard>
         )}
 
-        {/* All Cities section — only for CEO */}
+        {/* All Cities section — only for Director / CEO-level */}
         {isCEO && (
           <SectionCard title="All Cities" accent="bg-rose-400">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {cities.map((city) => {
-                const cityV = ventures.filter((v) => v.cityId === city.id);
+                let cityV = ventures.filter((v) => v.cityId === city.id);
+                if (activeContext?.type === "affiliate") {
+                  cityV = cityV.filter((v) => v.affiliateId === activeContext.affiliateId);
+                }
                 const leader = allUsers.find((u) => u.id === city.leaderId);
                 return (
                   <Link
@@ -205,20 +209,28 @@ export default function DashboardPage() {
         {/* Platform section — only for Platform Owner */}
         {isPlatformOwner && (
           <SectionCard title="Platform Overview" accent="bg-stone-800">
-            <div className="flex items-center gap-4 p-4 bg-stone-50 rounded-lg">
-              <div className="w-12 h-12 rounded-xl bg-stone-900 flex items-center justify-center text-amber-400 font-bold text-lg shrink-0">
-                L
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-stone-800">LINC</h3>
-                <p className="text-xs text-stone-500">{cities.length} cities &middot; {ventures.length} ventures &middot; {allUsers.length} users</p>
-              </div>
-              <Link href="/platform-admin" className="text-xs font-medium text-amber-600 hover:text-amber-700">
-                Manage &rarr;
-              </Link>
+            <div className="space-y-3">
+              {orgs.map((org) => {
+                const orgVentures = ventures.filter((v) => v.affiliateId === org.id);
+                const orgUsers = allUsers.filter((u) => u.roles.some((r) => r.affiliateId === org.id));
+                return (
+                  <div key={org.id} className="flex items-center gap-4 p-4 bg-stone-50 rounded-lg">
+                    <div className="w-12 h-12 rounded-xl bg-stone-900 flex items-center justify-center text-amber-400 font-bold text-lg shrink-0">
+                      {org.name[0]}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-stone-800">{org.name}</h3>
+                      <p className="text-xs text-stone-500">{orgVentures.length} ventures &middot; {orgUsers.length} users</p>
+                    </div>
+                    <Link href="/platform-admin" className="text-xs font-medium text-amber-600 hover:text-amber-700">
+                      Manage &rarr;
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
             <p className="mt-3 text-xs text-stone-400">
-              1 affiliate on the platform. Additional organizations will appear here as they onboard.
+              {orgs.length} affiliates on the platform.
             </p>
           </SectionCard>
         )}

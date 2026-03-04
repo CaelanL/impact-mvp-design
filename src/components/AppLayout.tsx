@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/lib/UserContext";
-import { getNavItems, getRoleLabel } from "@/lib/permissions";
+import { getNavItems, shouldShowSwitcher, getSwitcherOptions, getUserAffiliates } from "@/lib/permissions";
+import { orgs } from "@/lib/data";
 import { NavIcon } from "./NavIcon";
 import { RoleBadge } from "./RoleBadge";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, clearUser } = useUser();
+  const { currentUser, activeContext, setActiveContext, clearUser } = useUser();
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUser && pathname !== "/") {
@@ -22,12 +24,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setSidebarOpen(false);
+    setSwitcherOpen(false);
   }, [pathname]);
 
   if (!currentUser) return null;
 
   const navItems = getNavItems(currentUser);
   const uniqueRoles = [...new Set(currentUser.roles.map((r) => r.role))];
+  const showSwitcher = shouldShowSwitcher(currentUser);
+  const switcherOptions = showSwitcher ? getSwitcherOptions(currentUser) : [];
+
+  // Current context display info
+  const activeOrgName =
+    activeContext?.type === "platform"
+      ? "Platform View"
+      : activeContext?.type === "affiliate"
+        ? orgs.find((o) => o.id === activeContext.affiliateId)?.name ?? "Unknown"
+        : "—";
+  const activeOrgLetter =
+    activeContext?.type === "platform"
+      ? "P"
+      : activeContext?.type === "affiliate"
+        ? (orgs.find((o) => o.id === activeContext.affiliateId)?.name ?? "?")[0]
+        : "?";
 
   return (
     <div className="flex h-screen overflow-hidden bg-stone-50">
@@ -54,6 +73,92 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             Impact360
           </span>
         </div>
+
+        {/* Context switcher — only for multi-org/platform users */}
+        {showSwitcher && (
+          <div className="px-3 py-3 border-b border-stone-800">
+            <button
+              onClick={() => setSwitcherOpen(!switcherOpen)}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-stone-800/60 text-left cursor-pointer transition-colors"
+            >
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                activeContext?.type === "platform"
+                  ? "bg-stone-700 text-stone-300"
+                  : "bg-amber-500/20 text-amber-400"
+              }`}>
+                {activeOrgLetter}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-stone-200 truncate">{activeOrgName}</p>
+              </div>
+              <svg
+                className={`w-4 h-4 text-stone-500 shrink-0 transition-transform duration-150 ${switcherOpen ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+
+            {/* Dropdown */}
+            {switcherOpen && (
+              <div className="mt-1 bg-stone-800 rounded-lg border border-stone-700 overflow-hidden">
+                {switcherOptions.map((option) => {
+                  const isAffiliate = option.type === "affiliate";
+                  const key = isAffiliate ? option.affiliate.id : "platform";
+                  const label = isAffiliate ? option.affiliate.name : "Platform View";
+                  const letter = isAffiliate ? option.affiliate.name[0] : "P";
+                  const isActive = activeContext?.type === option.type && (
+                    option.type === "platform" ||
+                    (option.type === "affiliate" && activeContext.type === "affiliate" && activeContext.affiliateId === option.affiliate.id)
+                  );
+
+                  // Show divider before "Platform View"
+                  const showDivider = !isAffiliate;
+
+                  return (
+                    <div key={key}>
+                      {showDivider && (
+                        <div className="border-t border-stone-700 my-1" />
+                      )}
+                      <button
+                        onClick={() => {
+                          if (isAffiliate) {
+                            setActiveContext({ type: "affiliate", affiliateId: option.affiliate.id });
+                          } else {
+                            setActiveContext({ type: "platform" });
+                          }
+                          setSwitcherOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm cursor-pointer transition-colors ${
+                          isActive
+                            ? "bg-stone-700/60 text-stone-100"
+                            : "text-stone-300 hover:bg-stone-700/40 hover:text-stone-100"
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                          isAffiliate
+                            ? "bg-amber-500/15 text-amber-400"
+                            : "bg-stone-600 text-stone-300"
+                        }`}>
+                          {letter}
+                        </div>
+                        <span className="flex-1 truncate">{label}</span>
+                        {isActive && (
+                          <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
@@ -137,6 +242,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2">
+            {activeContext && showSwitcher && (
+              <span className="hidden sm:inline text-xs text-stone-500 font-medium bg-stone-100 px-2.5 py-1 rounded-full">
+                Viewing: {activeOrgName}
+              </span>
+            )}
             <span className="hidden sm:inline text-xs text-stone-400 font-medium bg-stone-100 px-2.5 py-1 rounded-full">
               Prototype Mode
             </span>

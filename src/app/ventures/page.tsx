@@ -12,11 +12,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function VenturesPage() {
-  const { currentUser } = useUser();
+  const { currentUser, activeContext } = useUser();
   const router = useRouter();
 
   const myVenture = currentUser ? getUserVenture(currentUser) : null;
-  const allVisible = currentUser ? getVisibleVentures(currentUser) : [];
+  const allVisible = currentUser ? getVisibleVentures(currentUser, activeContext ?? undefined) : [];
   const isVLOnly = currentUser && currentUser.roles.length === 1 && hasRole(currentUser, "venture_leader");
 
   // If VL only with one venture, redirect to that venture's page

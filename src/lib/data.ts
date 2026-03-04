@@ -13,9 +13,10 @@ import {
   ImpactEntry,
 } from "./types";
 
-// --- Organizations ---
+// --- Organizations (Affiliates) ---
 export const orgs: Org[] = [
   { id: "org-linc", name: "LINC", slug: "linc" },
+  { id: "org-grace", name: "Grace Church Chicago", slug: "grace-church" },
 ];
 
 // --- Cities ---
@@ -28,37 +29,44 @@ export const cities: City[] = [
   { id: "city-phoenix", name: "Phoenix", state: "AZ", leaderId: null, orgId: "org-linc" },
 ];
 
-// --- Users (Personas) ---
+// --- City Leader → Affiliate visibility (platform-level relationship) ---
+// Which affiliates can each city leader see?
+export const cityLeaderAffiliates: Record<string, string[]> = {
+  "user-sarah": ["org-linc", "org-grace"], // Chicago has both LINC and Grace Church
+  "user-david": ["org-linc"],              // Milwaukee only has LINC
+};
+
+// --- Users (Personas — selectable in persona picker) ---
 export const users: User[] = [
-  // 1. Maria — Venture Leader only
+  // 1. Maria — Venture Leader only (LINC)
   {
     id: "user-maria",
     name: "Maria Torres",
     email: "maria@hopekitchen.org",
     roles: [
-      { role: "venture_leader", scopeType: "venture", scopeId: "venture-hope-kitchen" },
+      { role: "venture_leader", affiliateId: "org-linc", scopeType: "venture", scopeId: "venture-hope-kitchen" },
     ],
   },
-  // 2. James — Coach only (no venture of his own)
+  // 2. James — Coach only, no venture (LINC)
   {
     id: "user-james",
     name: "James Carter",
     email: "james@linc.org",
     roles: [
-      { role: "coach", scopeType: "city", scopeId: "city-chicago" },
+      { role: "coach", affiliateId: "org-linc", scopeType: "city", scopeId: "city-chicago" },
     ],
   },
-  // 3. Josh — Venture Leader + Coach (dual role)
+  // 3. Josh — Venture Leader + Coach dual role (LINC)
   {
     id: "user-josh",
     name: "Josh Williams",
     email: "josh@milwaukeebarbers.org",
     roles: [
-      { role: "venture_leader", scopeType: "venture", scopeId: "venture-mke-barbers" },
-      { role: "coach", scopeType: "city", scopeId: "city-milwaukee" },
+      { role: "venture_leader", affiliateId: "org-linc", scopeType: "venture", scopeId: "venture-mke-barbers" },
+      { role: "coach", affiliateId: "org-linc", scopeType: "city", scopeId: "city-milwaukee" },
     ],
   },
-  // 4. Sarah — City Leader (Chicago, no venture)
+  // 4. Sarah — City Leader for Chicago (platform role)
   {
     id: "user-sarah",
     name: "Sarah Mitchell",
@@ -67,37 +75,47 @@ export const users: User[] = [
       { role: "city_leader", scopeType: "city", scopeId: "city-chicago" },
     ],
   },
-  // 5. David — City Leader + Venture Leader (dual role)
+  // 5. David — City Leader (platform) + Venture Leader (LINC)
   {
     id: "user-david",
     name: "David Okonkwo",
     email: "david@linc.org",
     roles: [
       { role: "city_leader", scopeType: "city", scopeId: "city-milwaukee" },
-      { role: "venture_leader", scopeType: "venture", scopeId: "venture-bright-futures" },
+      { role: "venture_leader", affiliateId: "org-linc", scopeType: "venture", scopeId: "venture-bright-futures" },
     ],
   },
-  // 6. Ben — CEO + Platform Owner
+  // 6. Ben — Director of LINC (affiliate) + Platform Owner (platform)
   {
     id: "user-ben",
     name: "Ben Harper",
     email: "ben@linc.org",
     roles: [
-      { role: "ceo", scopeType: "org", scopeId: "org-linc" },
+      { role: "director", affiliateId: "org-linc", scopeType: "org", scopeId: "org-linc" },
       { role: "platform_owner", scopeType: "platform", scopeId: "platform" },
+    ],
+  },
+  // 7. Pastor Mike — Director at Grace Church (affiliate-only user)
+  {
+    id: "user-mike",
+    name: "Mike Rivera",
+    email: "mike@gracechicago.org",
+    roles: [
+      { role: "director", affiliateId: "org-grace", scopeType: "org", scopeId: "org-grace" },
     ],
   },
 ];
 
-// --- Additional venture leaders (not personas, but needed for coach/city data) ---
+// --- Additional users (not personas, but needed for coach/city data) ---
 export const allUsers: User[] = [
   ...users,
+  // LINC venture leaders
   {
     id: "user-elena",
     name: "Elena Ruiz",
     email: "elena@freshharvest.org",
     roles: [
-      { role: "venture_leader", scopeType: "venture", scopeId: "venture-fresh-harvest" },
+      { role: "venture_leader", affiliateId: "org-linc", scopeType: "venture", scopeId: "venture-fresh-harvest" },
     ],
   },
   {
@@ -105,15 +123,15 @@ export const allUsers: User[] = [
     name: "Marcus Lee",
     email: "marcus@streetlight.org",
     roles: [
-      { role: "venture_leader", scopeType: "venture", scopeId: "venture-streetlight" },
+      { role: "venture_leader", affiliateId: "org-linc", scopeType: "venture", scopeId: "venture-streetlight" },
     ],
   },
   {
-    id: "user-grace",
+    id: "user-grace-ndaba",
     name: "Grace Ndaba",
     email: "grace@communitybridge.org",
     roles: [
-      { role: "venture_leader", scopeType: "venture", scopeId: "venture-community-bridge" },
+      { role: "venture_leader", affiliateId: "org-linc", scopeType: "venture", scopeId: "venture-community-bridge" },
     ],
   },
   {
@@ -121,19 +139,38 @@ export const allUsers: User[] = [
     name: "Tom Becker",
     email: "tom@newroots.org",
     roles: [
-      { role: "venture_leader", scopeType: "venture", scopeId: "venture-new-roots" },
+      { role: "venture_leader", affiliateId: "org-linc", scopeType: "venture", scopeId: "venture-new-roots" },
+    ],
+  },
+  // Grace Church venture leaders
+  {
+    id: "user-rachel",
+    name: "Rachel Kim",
+    email: "rachel@gracechicago.org",
+    roles: [
+      { role: "venture_leader", affiliateId: "org-grace", scopeType: "venture", scopeId: "venture-grace-meals" },
+    ],
+  },
+  {
+    id: "user-kevin",
+    name: "Kevin Brooks",
+    email: "kevin@gracechicago.org",
+    roles: [
+      { role: "venture_leader", affiliateId: "org-grace", scopeType: "venture", scopeId: "venture-grace-youth" },
     ],
   },
 ];
 
 // --- Ventures ---
 export const ventures: Venture[] = [
+  // LINC ventures
   {
     id: "venture-hope-kitchen",
     name: "Hope Kitchen",
     cause: "Food & Meal Ministry",
     address: "1234 W Division St, Chicago, IL",
     cityId: "city-chicago",
+    affiliateId: "org-linc",
     leaderId: "user-maria",
     stage: "accelerate",
     privacy: "connectable",
@@ -147,6 +184,7 @@ export const ventures: Venture[] = [
     cause: "Urban Agriculture & Food Access",
     address: "890 N Kedzie Ave, Chicago, IL",
     cityId: "city-chicago",
+    affiliateId: "org-linc",
     leaderId: "user-elena",
     stage: "build",
     privacy: "discoverable",
@@ -160,6 +198,7 @@ export const ventures: Venture[] = [
     cause: "Youth Education",
     address: "456 S Ashland Ave, Chicago, IL",
     cityId: "city-chicago",
+    affiliateId: "org-linc",
     leaderId: "user-marcus",
     stage: "scale",
     privacy: "connectable",
@@ -173,6 +212,7 @@ export const ventures: Venture[] = [
     cause: "Community Services & Outreach",
     address: "321 W Center St, Milwaukee, WI",
     cityId: "city-milwaukee",
+    affiliateId: "org-linc",
     leaderId: "user-josh",
     stage: "multiply",
     privacy: "connectable",
@@ -186,7 +226,8 @@ export const ventures: Venture[] = [
     cause: "Refugee & Immigrant Services",
     address: "700 N Water St, Milwaukee, WI",
     cityId: "city-milwaukee",
-    leaderId: "user-grace",
+    affiliateId: "org-linc",
+    leaderId: "user-grace-ndaba",
     stage: "build",
     privacy: "private",
     story: "Community Bridge helps newly arrived refugees navigate housing, employment, and community integration through one-on-one mentorship.",
@@ -199,6 +240,7 @@ export const ventures: Venture[] = [
     cause: "Housing & Financial Literacy",
     address: "1500 W National Ave, Milwaukee, WI",
     cityId: "city-milwaukee",
+    affiliateId: "org-linc",
     leaderId: "user-tom",
     stage: "accelerate",
     privacy: "discoverable",
@@ -212,6 +254,7 @@ export const ventures: Venture[] = [
     cause: "Youth Education",
     address: "250 E Brady St, Milwaukee, WI",
     cityId: "city-milwaukee",
+    affiliateId: "org-linc",
     leaderId: "user-david",
     stage: "scale",
     privacy: "connectable",
@@ -219,17 +262,49 @@ export const ventures: Venture[] = [
     lastSubmission: "2026-02-18",
     impact: { social: 310, spiritual: 85, economic: 1500 },
   },
+  // Grace Church ventures
+  {
+    id: "venture-grace-meals",
+    name: "Grace Meals Ministry",
+    cause: "Food & Meal Ministry",
+    address: "4501 N Magnolia Ave, Chicago, IL",
+    cityId: "city-chicago",
+    affiliateId: "org-grace",
+    leaderId: "user-rachel",
+    stage: "build",
+    privacy: "connectable",
+    story: "Grace Meals serves weekly community dinners from the church kitchen. What started as a potluck has grown into a full meal program serving 60+ families every Wednesday.",
+    lastSubmission: "2026-02-20",
+    impact: { social: 180, spiritual: 55, economic: 1200 },
+  },
+  {
+    id: "venture-grace-youth",
+    name: "Grace Youth Mentors",
+    cause: "Youth Mentorship",
+    address: "4501 N Magnolia Ave, Chicago, IL",
+    cityId: "city-chicago",
+    affiliateId: "org-grace",
+    leaderId: "user-kevin",
+    stage: "accelerate",
+    privacy: "discoverable",
+    story: "Pairing college students with at-risk teens for weekly mentorship sessions. Building relationships that go beyond homework help.",
+    lastSubmission: null,
+    impact: { social: 45, spiritual: 20, economic: 0 },
+  },
 ];
 
 // --- Coach Assignments ---
 export const coachAssignments: CoachAssignment[] = [
-  // James (Chicago coach) → Maria, Elena, Marcus
+  // James (LINC Chicago coach) → Maria, Elena, Marcus
   { coachId: "user-james", ventureLeaderId: "user-maria", ventureId: "venture-hope-kitchen" },
   { coachId: "user-james", ventureLeaderId: "user-elena", ventureId: "venture-fresh-harvest" },
   { coachId: "user-james", ventureLeaderId: "user-marcus", ventureId: "venture-streetlight" },
-  // Josh (Milwaukee coach) → Grace, Tom
-  { coachId: "user-josh", ventureLeaderId: "user-grace", ventureId: "venture-community-bridge" },
+  // Josh (LINC Milwaukee coach) → Grace, Tom
+  { coachId: "user-josh", ventureLeaderId: "user-grace-ndaba", ventureId: "venture-community-bridge" },
   { coachId: "user-josh", ventureLeaderId: "user-tom", ventureId: "venture-new-roots" },
+  // Mike (Grace Church director) coaches his own VLs
+  { coachId: "user-mike", ventureLeaderId: "user-rachel", ventureId: "venture-grace-meals" },
+  { coachId: "user-mike", ventureLeaderId: "user-kevin", ventureId: "venture-grace-youth" },
 ];
 
 // --- Notes ---
@@ -271,7 +346,7 @@ export const notes: Note[] = [
   },
 ];
 
-// --- Impact Entries (sample data for Hope Kitchen) ---
+// --- Impact Entries (sample data) ---
 export const impactEntries: ImpactEntry[] = [
   { id: "ie-1", ventureId: "venture-hope-kitchen", month: "2026-01", bucket: "social", metric: "Meals Served", value: 280, story: "Served Thanksgiving-style meals all month. Families kept coming back." },
   { id: "ie-2", ventureId: "venture-hope-kitchen", month: "2026-01", bucket: "social", metric: "People Fed", value: 120 },

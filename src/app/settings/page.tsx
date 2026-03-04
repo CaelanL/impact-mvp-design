@@ -24,8 +24,8 @@ export default function SettingsPage() {
     { id: "network", label: "Network Visibility", condition: hasRole(currentUser, "venture_leader") },
     { id: "impact-metrics", label: "Impact Metrics", condition: hasRole(currentUser, "coach") },
     { id: "city-admin", label: "City Admin", condition: hasRole(currentUser, "city_leader") },
-    { id: "org-admin", label: "Org Admin", condition: hasAnyRole(currentUser, ["ceo", "platform_owner"]) },
-    { id: "user-mgmt", label: "User Management", condition: hasAnyRole(currentUser, ["ceo", "platform_owner"]) },
+    { id: "org-admin", label: "Org Admin", condition: hasAnyRole(currentUser, ["director", "platform_owner", "admin"]) },
+    { id: "user-mgmt", label: "User Management", condition: hasAnyRole(currentUser, ["director", "platform_owner", "admin"]) },
     { id: "platform", label: "Platform Admin", condition: hasRole(currentUser, "platform_owner") },
   ].filter((t) => t.condition);
 

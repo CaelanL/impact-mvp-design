@@ -7,7 +7,7 @@ import { getVisibleVentures, hasRole, hasAnyRole } from "@/lib/permissions";
 import { cities } from "@/lib/data";
 
 export default function ReportsPage() {
-  const { currentUser } = useUser();
+  const { currentUser, activeContext } = useUser();
   const [selectedVenture, setSelectedVenture] = useState("all");
   const [selectedCity, setSelectedCity] = useState("all");
   const [dateRange, setDateRange] = useState("1month");
@@ -15,8 +15,8 @@ export default function ReportsPage() {
 
   if (!currentUser) return null;
 
-  const visibleVentures = getVisibleVentures(currentUser);
-  const canFilterByCity = hasAnyRole(currentUser, ["city_leader", "ceo", "platform_owner"]);
+  const visibleVentures = getVisibleVentures(currentUser, activeContext ?? undefined);
+  const canFilterByCity = hasAnyRole(currentUser, ["city_leader", "director", "platform_owner", "admin"]);
 
   return (
     <AppLayout>

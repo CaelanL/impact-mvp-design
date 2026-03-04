@@ -3,8 +3,8 @@
 // Given a user, determine what they can see and access.
 // ============================================================
 
-import { User, Role } from "./types";
-import { ventures, coachAssignments, cities } from "./data";
+import { User, Role, ActiveContext, Org } from "./types";
+import { ventures, coachAssignments, cities, orgs, cityLeaderAffiliates } from "./data";
 
 /** Check if user has a specific role */
 export function hasRole(user: User, role: Role): boolean {
@@ -20,8 +20,9 @@ export function hasAnyRole(user: User, roles: Role[]): boolean {
 export function getHighestRole(user: User): Role {
   const priority: Role[] = [
     "platform_owner",
-    "ceo",
+    "admin",
     "city_leader",
+    "director",
     "coach",
     "venture_leader",
   ];
@@ -48,10 +49,15 @@ export function getCoachedVentures(user: User) {
 }
 
 /** Get ventures in a user's city (for city leaders) */
-export function getCityVentures(user: User) {
+export function getCityVentures(user: User, activeContext?: ActiveContext) {
   const cityRole = user.roles.find((r) => r.role === "city_leader");
   if (!cityRole) return [];
-  return ventures.filter((v) => v.cityId === cityRole.scopeId);
+  let cityVents = ventures.filter((v) => v.cityId === cityRole.scopeId);
+  // If viewing a specific affiliate, filter to that affiliate's ventures
+  if (activeContext?.type === "affiliate") {
+    cityVents = cityVents.filter((v) => v.affiliateId === activeContext.affiliateId);
+  }
+  return cityVents;
 }
 
 /** Get the city a user leads (if city leader) */
@@ -61,25 +67,139 @@ export function getUserCity(user: User) {
   return cities.find((c) => c.id === cityRole.scopeId) ?? null;
 }
 
-/** Get ALL ventures visible to this user based on all their roles */
-export function getVisibleVentures(user: User) {
-  // CEO / Platform Owner see everything
-  if (hasAnyRole(user, ["ceo", "platform_owner"])) {
+/** Get all affiliates a user can access */
+export function getUserAffiliates(user: User): Org[] {
+  const affiliateIds = new Set<string>();
+
+  for (const r of user.roles) {
+    // Affiliate roles carry an affiliateId
+    if (r.affiliateId) {
+      affiliateIds.add(r.affiliateId);
+    }
+    // City leaders see affiliates linked to their city
+    if (r.role === "city_leader") {
+      const linked = cityLeaderAffiliates[user.id];
+      if (linked) linked.forEach((id) => affiliateIds.add(id));
+    }
+    // Platform owner and admin see all affiliates
+    if (r.role === "platform_owner" || r.role === "admin") {
+      orgs.forEach((o) => affiliateIds.add(o.id));
+    }
+  }
+
+  return orgs.filter((o) => affiliateIds.has(o.id));
+}
+
+/** Should this user see the context switcher? */
+export function shouldShowSwitcher(user: User): boolean {
+  const affiliates = getUserAffiliates(user);
+  const hasPlatformRole = user.roles.some(
+    (r) => r.role === "platform_owner" || r.role === "admin" || r.role === "city_leader"
+  );
+  return affiliates.length > 1 || hasPlatformRole;
+}
+
+/** Get switcher dropdown options for a user */
+export function getSwitcherOptions(
+  user: User
+): Array<{ type: "affiliate"; affiliate: Org } | { type: "platform" }> {
+  const options: Array<{ type: "affiliate"; affiliate: Org } | { type: "platform" }> = [];
+  const affiliates = getUserAffiliates(user);
+  for (const a of affiliates) {
+    options.push({ type: "affiliate", affiliate: a });
+  }
+  // Platform Owner and Admin get a "Platform View" option
+  if (hasAnyRole(user, ["platform_owner", "admin"])) {
+    options.push({ type: "platform" });
+  }
+  return options;
+}
+
+/** Compute the default context for a user */
+export function getDefaultContext(user: User): ActiveContext {
+  const affiliates = getUserAffiliates(user);
+  // Default to their first/primary affiliate
+  if (affiliates.length > 0) {
+    return { type: "affiliate", affiliateId: affiliates[0].id };
+  }
+  // Fallback for platform-only users
+  return { type: "platform" };
+}
+
+/** Get ALL ventures visible to this user based on roles + active context */
+export function getVisibleVentures(user: User, activeContext?: ActiveContext) {
+  // Platform context: platform_owner/admin see everything
+  if (
+    activeContext?.type === "platform" &&
+    hasAnyRole(user, ["platform_owner", "admin"])
+  ) {
+    return ventures;
+  }
+
+  // If in an affiliate context, scope everything to that affiliate
+  if (activeContext?.type === "affiliate") {
+    const affiliateVentures = ventures.filter(
+      (v) => v.affiliateId === activeContext.affiliateId
+    );
+
+    // Director sees all ventures in their affiliate
+    const directorRole = user.roles.find(
+      (r) => r.role === "director" && r.affiliateId === activeContext.affiliateId
+    );
+    if (directorRole) return affiliateVentures;
+
+    // Platform owner/admin see all ventures in the selected affiliate
+    if (hasAnyRole(user, ["platform_owner", "admin"])) return affiliateVentures;
+
+    // City leader viewing an affiliate: show ventures in their city within this affiliate
+    if (hasRole(user, "city_leader")) {
+      const cityRole = user.roles.find((r) => r.role === "city_leader");
+      if (cityRole) {
+        const cityFiltered = affiliateVentures.filter(
+          (v) => v.cityId === cityRole.scopeId
+        );
+        // Also add own venture if it's in this affiliate
+        const own = getUserVenture(user);
+        if (own && own.affiliateId === activeContext.affiliateId) {
+          const combined = new Map(cityFiltered.map((v) => [v.id, v]));
+          combined.set(own.id, own);
+          return Array.from(combined.values());
+        }
+        return cityFiltered;
+      }
+    }
+
+    // Otherwise apply normal role scoping within this affiliate
+    const visible = new Map<string, (typeof ventures)[0]>();
+
+    const own = getUserVenture(user);
+    if (own && own.affiliateId === activeContext.affiliateId) {
+      visible.set(own.id, own);
+    }
+
+    for (const v of getCoachedVentures(user)) {
+      if (v.affiliateId === activeContext.affiliateId) {
+        visible.set(v.id, v);
+      }
+    }
+
+    return Array.from(visible.values());
+  }
+
+  // No context set — legacy fallback (same as old behavior)
+  if (hasAnyRole(user, ["director", "platform_owner", "admin"])) {
     return ventures;
   }
 
   const visible = new Map<string, (typeof ventures)[0]>();
 
-  // Own venture
   const own = getUserVenture(user);
   if (own) visible.set(own.id, own);
 
-  // Coached ventures
   for (const v of getCoachedVentures(user)) {
     visible.set(v.id, v);
   }
 
-  // City ventures
   for (const v of getCityVentures(user)) {
     visible.set(v.id, v);
   }
@@ -91,7 +211,7 @@ export function getVisibleVentures(user: User) {
 export interface NavItem {
   label: string;
   href: string;
-  icon: string; // icon name — we'll map these to components
+  icon: string;
 }
 
 export function getNavItems(user: User): NavItem[] {
@@ -112,7 +232,7 @@ export function getNavItems(user: User): NavItem[] {
     items.push({ label: "My City", href: "/my-city", icon: "city" });
   }
 
-  if (hasAnyRole(user, ["ceo", "platform_owner"])) {
+  if (hasAnyRole(user, ["director", "platform_owner", "admin"])) {
     items.push({ label: "All Cities", href: "/all-cities", icon: "all-cities" });
   }
 
@@ -120,7 +240,7 @@ export function getNavItems(user: User): NavItem[] {
   items.push({ label: "Network", href: "/network", icon: "network" });
   items.push({ label: "Settings", href: "/settings", icon: "settings" });
 
-  if (hasRole(user, "platform_owner")) {
+  if (hasAnyRole(user, ["platform_owner", "admin"])) {
     items.push({ label: "Platform Admin", href: "/platform-admin", icon: "admin" });
   }
 
@@ -133,7 +253,8 @@ export function getRoleLabel(role: Role): string {
     venture_leader: "Venture Leader",
     coach: "Coach",
     city_leader: "City Leader",
-    ceo: "CEO",
+    director: "Director",
+    admin: "Admin",
     platform_owner: "Platform Owner",
   };
   return labels[role];
