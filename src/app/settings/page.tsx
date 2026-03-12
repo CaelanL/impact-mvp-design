@@ -24,7 +24,7 @@ export default function SettingsPage() {
     { id: "network", label: "Network Visibility", condition: hasRole(currentUser, "venture_leader") },
     { id: "impact-metrics", label: "Impact Metrics", condition: hasRole(currentUser, "coach") },
     { id: "city-admin", label: "City Admin", condition: hasRole(currentUser, "city_leader") },
-    { id: "org-admin", label: "Org Admin", condition: hasAnyRole(currentUser, ["director", "platform_owner", "admin"]) },
+    { id: "org-admin", label: "Organization", condition: hasAnyRole(currentUser, ["director", "platform_owner", "admin"]) },
     { id: "user-mgmt", label: "User Management", condition: hasAnyRole(currentUser, ["director", "platform_owner", "admin"]) },
     { id: "platform", label: "Platform Admin", condition: hasRole(currentUser, "platform_owner") },
   ].filter((t) => t.condition);
@@ -62,14 +62,14 @@ export default function SettingsPage() {
           </h2>
           <p className="text-sm text-stone-400 mb-6">
             {activeTab === "account" && "Manage your personal information and preferences."}
-            {activeTab === "venture" && "Configure your venture settings and details."}
+            {activeTab === "venture" && "Update your venture's information and details."}
             {activeTab === "notifications" && "Control what notifications you receive."}
             {activeTab === "network" && "Manage how your venture appears on the network."}
-            {activeTab === "impact-metrics" && "Configure impact metrics for your ventures."}
+            {activeTab === "impact-metrics" && "Choose what metrics your ventures track."}
             {activeTab === "city-admin" && "Manage coaches, ventures, and settings for your city."}
-            {activeTab === "org-admin" && "Organization-level configuration and management."}
-            {activeTab === "user-mgmt" && "Invite users, manage roles, and access permissions."}
-            {activeTab === "platform" && "Platform-wide configuration for all affiliates."}
+            {activeTab === "org-admin" && "Manage your organization's settings and structure."}
+            {activeTab === "user-mgmt" && "Invite users and manage who can do what."}
+            {activeTab === "platform" && "Manage settings for all organizations on the platform."}
           </p>
 
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -79,8 +79,8 @@ export default function SettingsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
             </div>
-            <p className="text-sm text-stone-400 font-medium">Settings will be available in MVP 1</p>
-            <p className="text-xs text-stone-300 mt-0.5">For now, this shows which settings your role has access to.</p>
+            <p className="text-sm text-stone-400 font-medium">Settings coming soon</p>
+            <p className="text-xs text-stone-300 mt-0.5">This shows which settings your role can access.</p>
           </div>
         </div>
       </div>

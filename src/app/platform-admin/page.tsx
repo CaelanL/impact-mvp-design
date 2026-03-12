@@ -24,9 +24,9 @@ export default function PlatformAdminPage() {
         {/* Affiliate list */}
         <div className="bg-white rounded-xl border border-stone-200 overflow-hidden mb-5">
           <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-stone-900">Affiliates</h2>
+            <h2 className="text-sm font-semibold text-stone-900">Organizations</h2>
             <button className="text-xs font-medium text-amber-600 hover:text-amber-700 cursor-pointer">
-              + Add Affiliate
+              + Add Organization
             </button>
           </div>
           <div className="divide-y divide-stone-100">
@@ -61,7 +61,7 @@ export default function PlatformAdminPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center p-3 bg-stone-50 rounded-lg">
               <div className="text-2xl font-semibold text-stone-900">{orgs.length}</div>
-              <div className="text-xs text-stone-500 mt-0.5">Affiliates</div>
+              <div className="text-xs text-stone-500 mt-0.5">Organizations</div>
             </div>
             <div className="text-center p-3 bg-stone-50 rounded-lg">
               <div className="text-2xl font-semibold text-stone-900">{cities.length}</div>
@@ -81,10 +81,10 @@ export default function PlatformAdminPage() {
         {/* Affiliate model note */}
         <div className="bg-stone-50 rounded-xl border border-stone-200 p-6 text-center">
           <p className="text-sm text-stone-500 font-medium">
-            Each affiliate gets their own Director, hierarchy, and ventures — fully isolated from other organizations.
+            Each organization has its own leadership structure and ventures, completely separate from others.
           </p>
           <p className="text-xs text-stone-400 mt-1">
-            City Leaders can see affiliates in their city. The Platform Owner sees everything.
+            City leaders can see organizations in their city. The platform owner can see all organizations.
           </p>
         </div>
       </div>

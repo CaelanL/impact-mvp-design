@@ -25,6 +25,9 @@ export type VentureStage =
 export type PrivacyLevel = "private" | "discoverable" | "connectable";
 
 export type CheckInStatus = "submitted" | "overdue" | "way_overdue" | "not_started";
+export type ImpactCategory = "social" | "spiritual" | "economic";
+export type ImpactMetricSource = "preset" | "custom";
+export type ImpactValueType = "count" | "currency";
 
 // --- Data interfaces ---
 
@@ -95,9 +98,22 @@ export interface Note {
 export interface ImpactEntry {
   id: string;
   ventureId: string;
-  month: string; // "2026-01", "2026-02", etc.
-  bucket: "social" | "spiritual" | "economic";
-  metric: string;
+  category: ImpactCategory;
+  metricId?: string;
+  metricLabel: string;
+  metricSource: ImpactMetricSource;
   value: number;
+  valueType: ImpactValueType;
+  startDate: string; // YYYY-MM-DD inclusive
+  endDate: string; // YYYY-MM-DD inclusive
   story?: string;
+  createdAt: string; // ISO datetime
+  updatedAt: string; // ISO datetime
+}
+
+export interface ImpactMetricOption {
+  id: string;
+  label: string;
+  category: ImpactCategory;
+  valueType: ImpactValueType;
 }

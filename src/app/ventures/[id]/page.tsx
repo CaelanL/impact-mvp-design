@@ -7,7 +7,7 @@ import { ventures, allUsers, notes as allNotes, cities } from "@/lib/data";
 import { ImpactCircle } from "@/components/ImpactCircle";
 import { StageBadge } from "@/components/StageBadge";
 import { StatusBadge } from "@/components/StatusBadge";
-import { hasAnyRole, hasRole } from "@/lib/permissions";
+import { hasAnyRole } from "@/lib/permissions";
 import Link from "next/link";
 
 export default function VentureDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +21,7 @@ export default function VentureDetailPage({ params }: { params: Promise<{ id: st
     return (
       <AppLayout>
         <div className="text-center py-20">
-          <p className="text-stone-500">Venture not found.</p>
+          <p className="text-stone-500">We couldn&apos;t find this venture. It may have been removed or you may not have access.</p>
           <Link href="/ventures" className="text-amber-600 text-sm mt-2 inline-block hover:text-amber-700">
             &larr; Back to ventures
           </Link>
@@ -137,7 +137,7 @@ export default function VentureDetailPage({ params }: { params: Promise<{ id: st
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-stone-400">No notes yet for this venture.</p>
+                <p className="text-sm text-stone-400">No coaching notes have been added yet.</p>
               )}
               <button className="mt-3 text-xs font-medium text-amber-600 hover:text-amber-700 cursor-pointer">
                 + Add Note
@@ -165,7 +165,7 @@ export default function VentureDetailPage({ params }: { params: Promise<{ id: st
               Generate Report
             </button>
             <Link href="/training" className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-stone-200 text-stone-600 rounded-lg text-sm font-medium hover:bg-stone-50">
-              See Venture Docs
+              Training &amp; Documents
             </Link>
           </div>
 
@@ -190,7 +190,7 @@ export default function VentureDetailPage({ params }: { params: Promise<{ id: st
                 <dd className="text-stone-700 font-medium">
                   {venture.lastSubmission
                     ? new Date(venture.lastSubmission).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-                    : "Never"
+                    : "Not yet submitted"
                   }
                 </dd>
               </div>
@@ -202,7 +202,7 @@ export default function VentureDetailPage({ params }: { params: Promise<{ id: st
             <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Milestones</h3>
             <div className="flex items-center justify-center py-6">
               <div className="text-center">
-                <p className="text-xs text-stone-400">Coming in Phase 2</p>
+                <p className="text-xs text-stone-400">Coming soon</p>
                 <p className="text-[10px] text-stone-300 mt-0.5">Grant eligibility, achievements, and more</p>
               </div>
             </div>

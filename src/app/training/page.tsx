@@ -34,13 +34,13 @@ export default function TrainingPage() {
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">Training</h1>
           <p className="text-sm text-stone-500 mt-1">
-            {venture ? `${venture.name} — Program track and resources` : "Venture training resources"}
+            {venture ? `${venture.name} — Your training path and resources` : "Venture training resources"}
           </p>
         </div>
 
         {/* Program track */}
         <div className="bg-white rounded-xl border border-stone-200 p-6 mb-5">
-          <h2 className="text-sm font-semibold text-stone-900 mb-5">Program Track</h2>
+          <h2 className="text-sm font-semibold text-stone-900 mb-5">Training Path</h2>
           <div className="flex items-center gap-1 mb-2">
             {stages.map((stage, i) => (
               <div key={stage} className="flex-1 flex flex-col items-center">

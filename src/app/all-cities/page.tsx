@@ -24,7 +24,7 @@ export default function AllCitiesPage() {
     ? orgs.find((o) => o.id === activeContext.affiliateId)?.name ?? ""
     : "";
   const contextLabel = activeContext?.type === "platform"
-    ? "across all affiliates"
+    ? "across all organizations"
     : activeContext?.type === "affiliate"
       ? `in ${activeOrgName}`
       : "across the LINC network";

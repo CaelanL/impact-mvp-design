@@ -8,8 +8,8 @@ interface StatusBadgeProps {
 
 const statusConfig = {
   submitted: { label: "Up to date", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
-  overdue: { label: "Overdue", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-  way_overdue: { label: "Way overdue", className: "bg-rose-500/10 text-rose-600 border-rose-500/20" },
+  overdue: { label: "Update needed", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
+  way_overdue: { label: "Needs attention", className: "bg-rose-500/10 text-rose-600 border-rose-500/20" },
   not_started: { label: "No data yet", className: "bg-stone-100 text-stone-500 border-stone-200" },
 };
 

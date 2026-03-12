@@ -36,7 +36,7 @@ export default function VenturesPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">Ventures</h1>
         <p className="text-sm text-stone-500 mt-1">
-          {allVisible.length} venture{allVisible.length !== 1 ? "s" : ""} in your scope
+          {allVisible.length} venture{allVisible.length !== 1 ? "s" : ""} you have access to
         </p>
       </div>
 

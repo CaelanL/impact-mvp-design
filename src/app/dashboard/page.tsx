@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
         {/* My Leaders section — only for Coaches */}
         {isCoach && coached.length > 0 && (
-          <SectionCard title={`My Leaders (${coached.length})`} accent="bg-amber-500">
+          <SectionCard title={`Leaders I Coach (${coached.length})`} accent="bg-amber-500">
             <div className="space-y-3">
               {coached.map((venture) => {
                 const leader = allUsers.find((u) => u.id === venture.leaderId);
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                     <div className="text-2xl font-semibold text-stone-900">
                       {cityVentures.filter(v => v.lastSubmission).length}
                     </div>
-                    <div className="text-xs text-stone-500 mt-0.5">Reporting</div>
+                    <div className="text-xs text-stone-500 mt-0.5">Submitting</div>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -230,7 +230,7 @@ export default function DashboardPage() {
               })}
             </div>
             <p className="mt-3 text-xs text-stone-400">
-              {orgs.length} affiliates on the platform.
+              {orgs.length} organizations on the platform.
             </p>
           </SectionCard>
         )}
@@ -247,7 +247,7 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
               </svg>
               <p className="text-sm text-stone-400 font-medium">Map View</p>
-              <p className="text-xs text-stone-300 mt-0.5">Coming in MVP 2</p>
+              <p className="text-xs text-stone-300 mt-0.5">Coming soon</p>
             </div>
           </div>
         </div>

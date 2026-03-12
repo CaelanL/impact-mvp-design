@@ -55,7 +55,7 @@ export default function NetworkPage() {
             </p>
           </div>
           <button className="text-xs font-medium text-amber-600 hover:text-amber-700 shrink-0 cursor-pointer">
-            Change
+            Change visibility
           </button>
         </div>
       )}
@@ -80,7 +80,7 @@ export default function NetworkPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
             </svg>
             <p className="text-sm text-stone-400 font-medium">Interactive Map</p>
-            <p className="text-xs text-stone-300 mt-0.5">Coming in MVP 2</p>
+            <p className="text-xs text-stone-300 mt-0.5">Coming soon</p>
           </div>
         </div>
       </div>

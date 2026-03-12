@@ -20,7 +20,7 @@ export default function MyCityPage() {
     return (
       <AppLayout>
         <div className="text-center py-20">
-          <p className="text-stone-500">You are not assigned as a city leader.</p>
+          <p className="text-stone-500">This page is for city leaders. If you think you should have access, contact your director.</p>
         </div>
       </AppLayout>
     );

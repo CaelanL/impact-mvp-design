@@ -42,3 +42,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright screenshots
+*.png
+
+# Harness folders
+.agents
+.factory

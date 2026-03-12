@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/lib/UserContext";
-import { getNavItems, shouldShowSwitcher, getSwitcherOptions, getUserAffiliates } from "@/lib/permissions";
+import { getNavItems, shouldShowSwitcher, getSwitcherOptions } from "@/lib/permissions";
 import { orgs } from "@/lib/data";
 import { NavIcon } from "./NavIcon";
 import { RoleBadge } from "./RoleBadge";
@@ -16,16 +16,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
 
+  function closeMenus() {
+    setSidebarOpen(false);
+    setSwitcherOpen(false);
+  }
+
   useEffect(() => {
     if (!currentUser && pathname !== "/") {
       router.push("/");
     }
   }, [currentUser, pathname, router]);
-
-  useEffect(() => {
-    setSidebarOpen(false);
-    setSwitcherOpen(false);
-  }, [pathname]);
 
   if (!currentUser) return null;
 
@@ -37,7 +37,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   // Current context display info
   const activeOrgName =
     activeContext?.type === "platform"
-      ? "Platform View"
+      ? "All Organizations"
       : activeContext?.type === "affiliate"
         ? orgs.find((o) => o.id === activeContext.affiliateId)?.name ?? "Unknown"
         : "—";
@@ -108,7 +108,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 {switcherOptions.map((option) => {
                   const isAffiliate = option.type === "affiliate";
                   const key = isAffiliate ? option.affiliate.id : "platform";
-                  const label = isAffiliate ? option.affiliate.name : "Platform View";
+                  const label = isAffiliate ? option.affiliate.name : "All Organizations";
                   const letter = isAffiliate ? option.affiliate.name[0] : "P";
                   const isActive = activeContext?.type === option.type && (
                     option.type === "platform" ||
@@ -130,7 +130,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           } else {
                             setActiveContext({ type: "platform" });
                           }
-                          setSwitcherOpen(false);
+                          closeMenus();
                         }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm cursor-pointer transition-colors ${
                           isActive
@@ -170,6 +170,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={closeMenus}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group ${
                   isActive
                     ? "bg-stone-800 text-stone-100"

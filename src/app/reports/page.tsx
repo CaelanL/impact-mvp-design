@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useUser } from "@/lib/UserContext";
-import { getVisibleVentures, hasRole, hasAnyRole } from "@/lib/permissions";
+import { getVisibleVentures, hasAnyRole } from "@/lib/permissions";
 import { cities } from "@/lib/data";
 
 export default function ReportsPage() {
@@ -28,7 +28,7 @@ export default function ReportsPage() {
 
         {/* Filters */}
         <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5 space-y-4">
-          <h2 className="text-sm font-semibold text-stone-900">Report Parameters</h2>
+          <h2 className="text-sm font-semibold text-stone-900">Report Options</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -81,7 +81,7 @@ export default function ReportsPage() {
                 className="w-full px-3 py-2.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 bg-white text-stone-700"
               >
                 <option>1-Page Summary (PDF)</option>
-                <option>Detailed Report</option>
+                <option>Detailed Report (PDF)</option>
               </select>
             </div>
           </div>
@@ -143,7 +143,7 @@ export default function ReportsPage() {
             <svg className="w-12 h-12 text-stone-200 mx-auto mb-3" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
             </svg>
-            <p className="text-sm text-stone-500 font-medium">Configure parameters above and click Generate Report</p>
+            <p className="text-sm text-stone-500 font-medium">Choose your options above, then generate a report</p>
             <p className="text-xs text-stone-400 mt-1">Reports will appear here as a preview</p>
           </div>
         )}
