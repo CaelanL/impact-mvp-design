@@ -386,3 +386,211 @@ export const metricOptions = {
     "Financial Literacy Graduates",
   ],
 };
+
+// ============================================================
+// Registration / Onboarding types and seed data
+// ============================================================
+
+export type InviteStatus = "pending" | "accepted" | "expired";
+export type ApplicantStatus = "pending" | "approved" | "rejected";
+export type MinistryType = "church" | "nonprofit" | "business" | "ministry";
+
+export interface PendingInvite {
+  id: string;
+  invitedByUserId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  mailingAddress?: string;
+  churchName?: string;
+  role: import("./types").AffiliateRole | import("./types").PlatformRole;
+  affiliateId?: string;
+  cityId?: string;
+  ventureId?: string;
+  coachId?: string;
+  ministryType?: MinistryType;
+  token: string;
+  status: InviteStatus;
+  personalNote?: string;
+  adminNote?: string;
+  createdAt: string;
+  acceptedAt?: string;
+}
+
+export interface Applicant {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  mailingAddress: string;
+  churchName?: string;
+  cityApplied: string;
+  cohort: string;
+  ventureName?: string;
+  ventureWebsite?: string;
+  ministryType: MinistryType;
+  ministryDescription: string;
+  faithStory: string;
+  gospelImpact: string;
+  programGoals: string;
+  referralSource?: string;
+  legalAgreed: boolean;
+  status: ApplicantStatus;
+  adminNotes?: string;
+  rejectionMessage?: string;
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedByUserId?: string;
+}
+
+export const pendingInvites: PendingInvite[] = [
+  {
+    id: "invite-1",
+    invitedByUserId: "user-ben",
+    email: "pastor.john@trinityministries.org",
+    firstName: "John",
+    lastName: "Osei",
+    phone: "414-555-0192",
+    role: "director",
+    affiliateId: "org-linc",
+    cityId: "city-milwaukee",
+    ministryType: "church",
+    token: "tok_abc123def456",
+    status: "pending",
+    personalNote: "Looking forward to having you on the platform, John.",
+    adminNote: "Ben knows him from the Milwaukee Summit. Director role for a new affiliate TBD.",
+    createdAt: "2026-03-05T10:00:00Z",
+  },
+  {
+    id: "invite-2",
+    invitedByUserId: "user-ben",
+    email: "amara.diallo@uplift.org",
+    firstName: "Amara",
+    lastName: "Diallo",
+    phone: "312-555-0847",
+    role: "venture_leader",
+    affiliateId: "org-linc",
+    cityId: "city-chicago",
+    ventureId: undefined,
+    coachId: "user-james",
+    ministryType: "nonprofit",
+    token: "tok_xyz789ghi012",
+    status: "pending",
+    adminNote: "VL for a new food-access nonprofit in South Chicago. James will coach.",
+    createdAt: "2026-03-07T14:30:00Z",
+  },
+  {
+    id: "invite-3",
+    invitedByUserId: "user-sarah",
+    email: "rev.chen@gracenorthside.org",
+    firstName: "Li",
+    lastName: "Chen",
+    phone: "312-555-0334",
+    role: "director",
+    affiliateId: "org-grace",
+    cityId: "city-chicago",
+    ministryType: "church",
+    token: "tok_mno345pqr678",
+    status: "accepted",
+    createdAt: "2026-02-20T09:00:00Z",
+    acceptedAt: "2026-02-21T11:15:00Z",
+  },
+];
+
+export const applicants: Applicant[] = [
+  {
+    id: "app-1",
+    firstName: "Destiny",
+    lastName: "Owens",
+    email: "destiny@secondchancewi.org",
+    phone: "414-555-0621",
+    mailingAddress: "88 N 10th St, Milwaukee, WI 53233",
+    churchName: "Redemption Church Milwaukee",
+    cityApplied: "Milwaukee WI",
+    cohort: "Milwaukee WI",
+    ventureName: "Second Chance Re-entry",
+    ventureWebsite: "no website",
+    ministryType: "nonprofit",
+    ministryDescription: "We help formerly incarcerated individuals find stable housing and employment through a 12-week intensive program that combines practical skills with mentorship and community support.",
+    faithStory: "I grew up in church but drifted away in my twenties. After my brother's incarceration, I came back to faith and felt called to build something that could have helped him.",
+    gospelImpact: "Every participant hears our story and why we do what we do. We open and close each session in prayer, and several participants have connected with local churches through our network.",
+    programGoals: "I'm looking for accountability, structure, and connections to other leaders who understand both the ministry and the operational side of running a nonprofit.",
+    referralSource: "Josh Williams referred me",
+    legalAgreed: true,
+    status: "pending",
+    submittedAt: "2026-03-06T16:45:00Z",
+  },
+  {
+    id: "app-2",
+    firstName: "Rafael",
+    lastName: "Mendoza",
+    email: "rafael@barriofresh.com",
+    phone: "312-555-0489",
+    mailingAddress: "2240 S Millard Ave, Chicago, IL 60623",
+    churchName: "Iglesia Nueva Vida",
+    cityApplied: "Chicago IL",
+    cohort: "Chicago IL",
+    ventureName: "Barrio Fresh Market",
+    ventureWebsite: "barriofresh.com",
+    ministryType: "business",
+    ministryDescription: "A fresh produce market and community hub in Little Village that makes healthy food affordable while creating local jobs. We reinvest 10% of profits into neighborhood programs.",
+    faithStory: "My faith has always been shaped by the idea that work is worship. Running a business that serves my community and honors God is the center of my calling.",
+    gospelImpact: "We host a monthly community dinner where local pastors share. Our employees hear our mission and see it lived out. Two employees have started attending church because of relationships built at the market.",
+    programGoals: "Fundraising strategy, connecting with other business-minded leaders, and learning how to measure and report our community impact more rigorously.",
+    referralSource: "Saw a post on Instagram",
+    legalAgreed: true,
+    status: "pending",
+    submittedAt: "2026-03-07T11:20:00Z",
+  },
+  {
+    id: "app-3",
+    firstName: "Priya",
+    lastName: "Nair",
+    email: "priya@hopehousechicago.org",
+    phone: "773-555-0215",
+    mailingAddress: "1600 W Lawrence Ave, Chicago, IL 60640",
+    cityApplied: "Chicago IL",
+    cohort: "Chicago IL",
+    ventureName: "Still working on it.",
+    ventureWebsite: "no website",
+    ministryType: "ministry",
+    ministryDescription: "I've been running an informal hospitality ministry out of my apartment for three years — hosting international students, helping them navigate culture shock, and pointing them toward faith communities.",
+    faithStory: "I came to faith through a hospitality community in India. Someone opened their home and it changed my life. I want to do the same for others in Chicago.",
+    gospelImpact: "The Gospel is woven into every meal and every conversation. I don't separate the hospitality from the mission — they're the same thing.",
+    programGoals: "Help formalizing what I'm doing so it can grow beyond my apartment. Accountability and a framework for thinking about it as a real venture.",
+    referralSource: "Sarah Mitchell connected me",
+    legalAgreed: true,
+    status: "approved",
+    adminNotes: "Great candidate. Sarah knows her personally. Assigning to James as coach.",
+    submittedAt: "2026-02-28T09:00:00Z",
+    reviewedAt: "2026-03-01T14:00:00Z",
+    reviewedByUserId: "user-ben",
+  },
+  {
+    id: "app-4",
+    firstName: "Trevor",
+    lastName: "Walsh",
+    email: "trevor.walsh88@gmail.com",
+    phone: "414-555-0933",
+    mailingAddress: "400 E Capitol Dr, Milwaukee, WI 53212",
+    cityApplied: "Milwaukee WI",
+    cohort: "Milwaukee WI",
+    ventureName: "Still working on it.",
+    ventureWebsite: "no website",
+    ministryType: "church",
+    ministryDescription: "I lead a small group at my church and have been thinking about starting something in my neighborhood. Not sure exactly what yet.",
+    faithStory: "Grew up in faith, went through a dry period in college, came back about three years ago. Feeling called to do something but still figuring out what.",
+    gospelImpact: "Everything I do is rooted in sharing the Gospel but I don't have a concrete answer to this yet.",
+    programGoals: "Just exploring at this stage. Want to see if this program is a fit.",
+    referralSource: "Google search",
+    legalAgreed: true,
+    status: "rejected",
+    adminNotes: "Too early in discernment. No venture, no clear direction. Encouraged to reconnect in the next cohort.",
+    rejectionMessage: "Thank you for applying, Trevor. Based on your application, it sounds like you're still in the early stages of discernment — which is completely valid. We'd love for you to reconnect when your direction is a bit clearer. Feel free to reach out to us at any time.",
+    submittedAt: "2026-03-02T20:15:00Z",
+    reviewedAt: "2026-03-04T10:30:00Z",
+    reviewedByUserId: "user-sarah",
+  },
+];
