@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { AppLayout } from "@/components/AppLayout";
 import { useUser } from "@/lib/UserContext";
+import { hasAnyRole } from "@/lib/permissions";
 import { orgs, cities, ventures, allUsers } from "@/lib/data";
 
 export default function PlatformAdminPage() {
@@ -77,6 +79,30 @@ export default function PlatformAdminPage() {
             </div>
           </div>
         </div>
+
+        {/* Onboarding card — platform_owner and admin only */}
+        {hasAnyRole(currentUser, ["platform_owner", "admin"]) && (
+          <Link
+            href="/platform-admin/onboarding"
+            className="block bg-white rounded-xl border border-stone-200 p-5 mb-5 hover:border-stone-300 hover:shadow-sm cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-stone-900 mb-0.5">User Management &amp; Onboarding</h2>
+                <p className="text-xs text-stone-500">Invite users, manage pending invites, and review applicants</p>
+              </div>
+              <svg
+                className="w-4 h-4 text-stone-400 group-hover:text-amber-500 shrink-0 ml-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </div>
+          </Link>
+        )}
 
         {/* Affiliate model note */}
         <div className="bg-stone-50 rounded-xl border border-stone-200 p-6 text-center">

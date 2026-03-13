@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useUser } from "@/lib/UserContext";
 import { users } from "@/lib/data";
 import {
@@ -243,6 +244,17 @@ export default function PersonaSelector() {
           <div className="mt-4 inline-flex items-center gap-2 text-xs text-stone-600 bg-stone-900 border border-stone-800 rounded-full px-4 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             Interactive Prototype
+          </div>
+
+          {/* New applicant CTA */}
+          <div className="mt-8 flex flex-col items-center gap-2">
+            <p className="text-xs text-stone-600">Not a member yet?</p>
+            <Link
+              href="/apply"
+              className="border border-stone-700 text-stone-400 hover:border-amber-500/50 hover:text-amber-400 transition-colors px-5 py-2.5 rounded-xl text-sm font-medium cursor-pointer"
+            >
+              Apply to Join Impact360 →
+            </Link>
           </div>
         </div>
 
