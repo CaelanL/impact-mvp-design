@@ -10,7 +10,7 @@ import { NavIcon } from "./NavIcon";
 import { RoleBadge } from "./RoleBadge";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, activeContext, setActiveContext, clearUser } = useUser();
+  const { isHydrated, currentUser, activeContext, setActiveContext, clearUser } = useUser();
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,12 +22,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (!currentUser && pathname !== "/") {
+    if (isHydrated && !currentUser && pathname !== "/") {
       router.push("/");
     }
-  }, [currentUser, pathname, router]);
+  }, [currentUser, isHydrated, pathname, router]);
 
-  if (!currentUser) return null;
+  if (!isHydrated || !currentUser) return null;
 
   const navItems = getNavItems(currentUser);
   const uniqueRoles = [...new Set(currentUser.roles.map((r) => r.role))];

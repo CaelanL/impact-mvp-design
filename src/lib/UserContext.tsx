@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useCallback, useSyncExternalStore, type ReactNode } from "react";
 import { User, ActiveContext } from "./types";
 import { users } from "./data";
 import { getDefaultContext } from "./permissions";
 
 interface UserContextType {
+  isHydrated: boolean;
   currentUser: User | null;
   activeContext: ActiveContext | null;
   selectUser: (userId: string) => void;
@@ -14,6 +15,7 @@ interface UserContextType {
 }
 
 const UserContext = createContext<UserContextType>({
+  isHydrated: false,
   currentUser: null,
   activeContext: null,
   selectUser: () => {},
@@ -21,64 +23,109 @@ const UserContext = createContext<UserContextType>({
   clearUser: () => {},
 });
 
-export function UserProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("impact360_persona");
-      if (saved) {
-        const found = users.find((u) => u.id === saved);
-        if (found) return found;
-      }
+const SESSION_EVENT = "impact360-session-change";
+let cachedSessionKey: string | null = null;
+let cachedSessionSnapshot: Pick<UserContextType, "isHydrated" | "currentUser" | "activeContext"> | null = null;
+
+function readSessionFromStorage(): Pick<UserContextType, "isHydrated" | "currentUser" | "activeContext"> {
+  if (typeof window === "undefined") {
+    return { isHydrated: false, currentUser: null, activeContext: null };
+  }
+
+  const savedPersonaId = localStorage.getItem("impact360_persona");
+  const savedContext = localStorage.getItem("impact360_context");
+  const currentUser = savedPersonaId ? users.find((user) => user.id === savedPersonaId) ?? null : null;
+
+  let snapshot: Pick<UserContextType, "isHydrated" | "currentUser" | "activeContext">;
+
+  if (savedContext) {
+    try {
+      snapshot = {
+        isHydrated: true,
+        currentUser,
+        activeContext: JSON.parse(savedContext) as ActiveContext,
+      };
+    } catch {
+      // ignore invalid stored context and fall back to the default
     }
-    return null;
+  }
+
+  snapshot ??= {
+    isHydrated: true,
+    currentUser,
+    activeContext: currentUser ? getDefaultContext(currentUser) : null,
+  };
+
+  const nextKey = JSON.stringify({
+    currentUserId: snapshot.currentUser?.id ?? null,
+    activeContext: snapshot.activeContext,
+    isHydrated: snapshot.isHydrated,
   });
 
-  const [activeContext, setActiveContextState] = useState<ActiveContext | null>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("impact360_context");
-      if (saved) {
-        try {
-          return JSON.parse(saved) as ActiveContext;
-        } catch {
-          // ignore
-        }
-      }
-      // Compute default from saved persona
-      const personaId = localStorage.getItem("impact360_persona");
-      if (personaId) {
-        const found = users.find((u) => u.id === personaId);
-        if (found) return getDefaultContext(found);
-      }
-    }
-    return null;
-  });
+  if (cachedSessionSnapshot && cachedSessionKey === nextKey) {
+    return cachedSessionSnapshot;
+  }
+
+  cachedSessionKey = nextKey;
+  cachedSessionSnapshot = snapshot;
+  return snapshot;
+}
+
+function getServerSnapshot(): Pick<UserContextType, "isHydrated" | "currentUser" | "activeContext"> {
+  return { isHydrated: false, currentUser: null, activeContext: null };
+}
+
+function subscribeToSession(callback: () => void) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+
+  const notify = () => callback();
+  window.addEventListener("storage", notify);
+  window.addEventListener(SESSION_EVENT, notify);
+
+  return () => {
+    window.removeEventListener("storage", notify);
+    window.removeEventListener(SESSION_EVENT, notify);
+  };
+}
+
+function emitSessionChange() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(SESSION_EVENT));
+  }
+}
+
+export function UserProvider({ children }: { children: ReactNode }) {
+  const { isHydrated, currentUser, activeContext } = useSyncExternalStore(
+    subscribeToSession,
+    readSessionFromStorage,
+    getServerSnapshot,
+  );
 
   const setActiveContext = useCallback((context: ActiveContext) => {
-    setActiveContextState(context);
     localStorage.setItem("impact360_context", JSON.stringify(context));
+    emitSessionChange();
   }, []);
 
   const selectUser = useCallback((userId: string) => {
     const user = users.find((u) => u.id === userId);
     if (user) {
-      setCurrentUser(user);
       localStorage.setItem("impact360_persona", userId);
-      // Reset context to user's default
       const defaultCtx = getDefaultContext(user);
-      setActiveContextState(defaultCtx);
       localStorage.setItem("impact360_context", JSON.stringify(defaultCtx));
+      emitSessionChange();
     }
   }, []);
 
   const clearUser = useCallback(() => {
-    setCurrentUser(null);
-    setActiveContextState(null);
     localStorage.removeItem("impact360_persona");
     localStorage.removeItem("impact360_context");
+    emitSessionChange();
   }, []);
 
   return (
-    <UserContext.Provider value={{ currentUser, activeContext, selectUser, setActiveContext, clearUser }}>
+    <UserContext.Provider value={{ isHydrated, currentUser, activeContext, selectUser, setActiveContext, clearUser }}>
       {children}
     </UserContext.Provider>
   );
