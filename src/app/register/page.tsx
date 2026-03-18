@@ -26,7 +26,7 @@ function RegisterContent() {
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        router.push("/");
+        router.push("/dashboard");
       }, 2000);
       return () => clearTimeout(timer);
     }

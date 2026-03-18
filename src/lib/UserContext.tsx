@@ -71,8 +71,14 @@ function readSessionFromStorage(): Pick<UserContextType, "isHydrated" | "current
   return snapshot;
 }
 
+const SERVER_SNAPSHOT: Pick<UserContextType, "isHydrated" | "currentUser" | "activeContext"> = {
+  isHydrated: false,
+  currentUser: null,
+  activeContext: null,
+};
+
 function getServerSnapshot(): Pick<UserContextType, "isHydrated" | "currentUser" | "activeContext"> {
-  return { isHydrated: false, currentUser: null, activeContext: null };
+  return SERVER_SNAPSHOT;
 }
 
 function subscribeToSession(callback: () => void) {

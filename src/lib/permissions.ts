@@ -25,6 +25,7 @@ export function getHighestRole(user: User): Role {
     "director",
     "coach",
     "venture_leader",
+    "church_partner",
   ];
   for (const role of priority) {
     if (hasRole(user, role)) return role;
@@ -215,6 +216,15 @@ export interface NavItem {
 }
 
 export function getNavItems(user: User): NavItem[] {
+  // Church partners have a limited view: Dashboard, Network, Settings only
+  if (hasRole(user, "church_partner") && !hasAnyRole(user, ["venture_leader", "coach", "director", "city_leader", "admin", "platform_owner"])) {
+    return [
+      { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
+      { label: "Network", href: "/network", icon: "network" },
+      { label: "Settings", href: "/settings", icon: "settings" },
+    ];
+  }
+
   const items: NavItem[] = [
     { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
     { label: "Ventures", href: "/ventures", icon: "ventures" },
@@ -256,6 +266,7 @@ export function getRoleLabel(role: Role): string {
     director: "Director",
     admin: "Admin",
     platform_owner: "Platform Owner",
+    church_partner: "Church Partner",
   };
   return labels[role];
 }
