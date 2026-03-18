@@ -518,7 +518,7 @@ function UsersTab({ localOrgs, inviteOpen, setInviteOpen }: { localOrgs: Org[]; 
         <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-stone-900">Active Users</h2>
           <button
-            onClick={() => setInviteOpen((o) => !o)}
+            onClick={() => setInviteOpen(!inviteOpen)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
               inviteOpen
                 ? "bg-stone-100 text-stone-600 hover:bg-stone-200 border border-stone-200"
