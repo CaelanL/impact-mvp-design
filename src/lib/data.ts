@@ -12,6 +12,7 @@ import {
   Note,
   ImpactEntry,
   ImpactMetricOption,
+  Cohort,
 } from "./types";
 
 // --- Organizations (Affiliates) ---
@@ -643,6 +644,30 @@ export const pendingInvites: PendingInvite[] = [
     createdAt: "2026-02-20T09:00:00Z",
     acceptedAt: "2026-02-21T11:15:00Z",
   },
+];
+
+// --- Cohorts ---
+export const cohorts: Cohort[] = [
+  // Chicago
+  { id: "cohort-chi-1", name: "Chicago Spring 2026", cityId: "city-chicago", season: "Spring 2026", isActive: true },
+  { id: "cohort-chi-2", name: "Chicago Fall 2025", cityId: "city-chicago", season: "Fall 2025", isActive: false },
+  { id: "cohort-chi-3", name: "Chicago Spring 2025", cityId: "city-chicago", season: "Spring 2025", isActive: false },
+  // Milwaukee
+  { id: "cohort-mke-1", name: "Milwaukee Spring 2026", cityId: "city-milwaukee", season: "Spring 2026", isActive: true },
+  { id: "cohort-mke-2", name: "Milwaukee Fall 2025", cityId: "city-milwaukee", season: "Fall 2025", isActive: false },
+  { id: "cohort-mke-3", name: "Milwaukee Spring 2025", cityId: "city-milwaukee", season: "Spring 2025", isActive: false },
+  // Dallas
+  { id: "cohort-dal-1", name: "Dallas Spring 2026", cityId: "city-dallas", season: "Spring 2026", isActive: true },
+  { id: "cohort-dal-2", name: "Dallas Fall 2025", cityId: "city-dallas", season: "Fall 2025", isActive: false },
+  // Atlanta
+  { id: "cohort-atl-1", name: "Atlanta Spring 2026", cityId: "city-atlanta", season: "Spring 2026", isActive: true },
+  { id: "cohort-atl-2", name: "Atlanta Fall 2025", cityId: "city-atlanta", season: "Fall 2025", isActive: false },
+  // Denver
+  { id: "cohort-den-1", name: "Denver Spring 2026", cityId: "city-denver", season: "Spring 2026", isActive: true },
+  { id: "cohort-den-2", name: "Denver Fall 2025", cityId: "city-denver", season: "Fall 2025", isActive: false },
+  // Phoenix
+  { id: "cohort-phx-1", name: "Phoenix Spring 2026", cityId: "city-phoenix", season: "Spring 2026", isActive: true },
+  { id: "cohort-phx-2", name: "Phoenix Fall 2025", cityId: "city-phoenix", season: "Fall 2025", isActive: false },
 ];
 
 export const applicants: Applicant[] = [

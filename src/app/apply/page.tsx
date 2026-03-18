@@ -2,12 +2,13 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { cities, cohorts } from "@/lib/data";
 
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
 
-type MinistryType = "Church" | "Nonprofit" | "Business" | "Ministry" | "";
+type MinistryType = "Church" | "Nonprofit" | "Business" | "Ministry" | "Unsure" | "";
 
 interface FormData {
   // Step 1 — Contact
@@ -60,24 +61,7 @@ const initialFormData: FormData = {
 // Constants
 // ─────────────────────────────────────────────
 
-const CITIES = [
-  "Bay Area CA",
-  "Chicago IL",
-  "Dallas TX",
-  "Houston TX",
-  "Milwaukee WI",
-  "Southern California",
-  "St. Louis",
-  "Twin Cities MN",
-  "Las Vegas NV",
-];
-
-const COHORTS = [
-  "Spring 2026 Cohort",
-  "Fall 2026 Cohort",
-];
-
-const MINISTRY_TYPES: MinistryType[] = ["Church", "Nonprofit", "Business", "Ministry"];
+const MINISTRY_TYPES: MinistryType[] = ["Church", "Nonprofit", "Business", "Ministry", "Unsure"];
 
 const STEP_LABELS = ["Contact", "Location", "Ministry", "Agreement", "Review"];
 
@@ -326,6 +310,13 @@ function Step2({
   onChange: (field: keyof FormData, value: string) => void;
   errors: Partial<Record<keyof FormData, string>>;
 }) {
+  // Find the selected city's id so we can filter cohorts
+  const selectedCity = cities.find((c) => `${c.name}, ${c.state}` === formData.city);
+  const availableCohorts = selectedCity
+    ? cohorts.filter((co) => co.cityId === selectedCity.id)
+    : [];
+  const cohortDropdownDisabled = !selectedCity;
+
   return (
     <div className="space-y-5">
       <div>
@@ -347,16 +338,23 @@ function Step2({
           <select
             className={selectClass}
             value={formData.city}
-            onChange={(e) => onChange("city", e.target.value)}
+            onChange={(e) => {
+              onChange("city", e.target.value);
+              // Reset cohort when city changes
+              onChange("cohort", "");
+            }}
           >
             <option value="" disabled>
               Select a city...
             </option>
-            {CITIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
+            {cities.map((c) => {
+              const label = `${c.name}, ${c.state}`;
+              return (
+                <option key={c.id} value={label}>
+                  {label}
+                </option>
+              );
+            })}
           </select>
           {/* Custom chevron */}
           <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
@@ -381,23 +379,27 @@ function Step2({
       {/* Cohort dropdown */}
       <div>
         <label className={labelClass}>
-          Which 2026 Cohort Are You Applying For?{" "}
+          Which Cohort Are You Applying For?{" "}
           <span className="text-rose-400">*</span>
         </label>
         <div className="relative mt-1.5">
           <select
-            className={selectClass}
+            className={`${selectClass} ${cohortDropdownDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
             value={formData.cohort}
             onChange={(e) => onChange("cohort", e.target.value)}
+            disabled={cohortDropdownDisabled}
           >
             <option value="" disabled>
-              Select a cohort...
+              {cohortDropdownDisabled ? "Select a city first" : "Select a cohort..."}
             </option>
-            {COHORTS.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            {availableCohorts.map((co) => (
+              <option key={co.id} value={co.name}>
+                {co.name}
               </option>
             ))}
+            {!cohortDropdownDisabled && (
+              <option value="not-sure">Not sure yet</option>
+            )}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
             <svg
@@ -446,6 +448,11 @@ const ministryTypeIcons: Record<string, ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
     </svg>
   ),
+  Unsure: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+    </svg>
+  ),
 };
 
 // ─────────────────────────────────────────────
@@ -481,13 +488,13 @@ function Step3({
         <input
           type="text"
           className={`${inputClass} mt-1.5`}
-          placeholder="Hope Kitchen"
+          placeholder="Enter your ministry name, or leave blank if undecided"
           value={formData.ministryName}
           onChange={(e) => onChange("ministryName", e.target.value)}
         />
         <p className={helperClass}>
-          If you haven&apos;t decided on a name yet, type &quot;Still working on
-          it.&quot;
+          It&apos;s okay if you haven&apos;t landed on a name yet — just leave
+          this blank or jot down what you&apos;re thinking.
         </p>
       </div>
 
@@ -531,7 +538,7 @@ function Step3({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {MINISTRY_TYPES.map((type) => {
             const isSelected = formData.ministryType === type;
             return (
@@ -599,12 +606,13 @@ function Step3({
         <textarea
           rows={4}
           className={`${inputClass} mt-1.5 resize-none`}
-          placeholder="Describe your work..."
+          placeholder="Describe your ministry vision, even if it's still forming…"
           value={formData.ministryDescription}
           onChange={(e) => onChange("ministryDescription", e.target.value)}
         />
         <p className={helperClass}>
-          What problem are you solving? Who is your target audience?
+          What are you building, and who does it serve? Share as much or as
+          little as you have right now.
         </p>
         {errors.ministryDescription && (
           <p className={errorClass}>{errors.ministryDescription}</p>
@@ -620,13 +628,13 @@ function Step3({
         <textarea
           rows={4}
           className={`${inputClass} mt-1.5 resize-none`}
-          placeholder="Share your walk with God..."
+          placeholder="Share your walk with God, in whatever season you're in…"
           value={formData.faithStory}
           onChange={(e) => onChange("faithStory", e.target.value)}
         />
         <p className={helperClass}>
-          This is also known as a testimony — what your walk with God has been.
-          If you don&apos;t have a faith story, type &quot;no faith story.&quot;
+          This is your testimony — where you&apos;ve been and where you are
+          now. There&apos;s no wrong answer here.
         </p>
         {errors.faithStory && (
           <p className={errorClass}>{errors.faithStory}</p>
@@ -642,7 +650,7 @@ function Step3({
         <textarea
           rows={4}
           className={`${inputClass} mt-1.5 resize-none`}
-          placeholder="Describe how the Gospel is central to what you do..."
+          placeholder="Share how you've seen the gospel at work, in any capacity…"
           value={formData.gospelExperience}
           onChange={(e) => onChange("gospelExperience", e.target.value)}
         />

@@ -4,7 +4,7 @@
 
 // --- Role types (two-layer model) ---
 
-export type AffiliateRole = "director" | "coach" | "venture_leader";
+export type AffiliateRole = "director" | "coach" | "venture_leader" | "church_partner";
 export type PlatformRole = "platform_owner" | "admin" | "city_leader";
 export type Role = AffiliateRole | PlatformRole;
 
@@ -116,4 +116,13 @@ export interface ImpactMetricOption {
   label: string;
   category: ImpactCategory;
   valueType: ImpactValueType;
+}
+
+export interface Cohort {
+  id: string;
+  name: string;
+  cityId: string;        // which city this cohort belongs to
+  affiliateId?: string;  // optional: if scoped to a specific affiliate
+  season: string;        // e.g. "Spring 2026"
+  isActive: boolean;
 }

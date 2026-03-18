@@ -15,6 +15,7 @@ const roleColors: Record<Role, string> = {
   director: "bg-rose-500/10 text-rose-700 border-rose-500/25",
   admin: "bg-indigo-500/10 text-indigo-700 border-indigo-500/25",
   platform_owner: "bg-stone-800 text-stone-100 border-stone-700",
+  church_partner: "bg-green-500/10 text-green-700 border-green-500/25",
 };
 
 export function RoleBadge({ role, size = "sm" }: RoleBadgeProps) {
